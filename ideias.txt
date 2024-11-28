@@ -1,0 +1,12 @@
+lunar lander: vento lunar (ja existe)
+
+mountain car: alterar a reward
+
+acrobot: alterar a joint
+
+car racing: raycasts
+
+cart pole: vento lunar
+
+
+basta alterar as opções dos env q ja existem?
