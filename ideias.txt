@@ -10,13 +10,8 @@ lunar lander:
 - change terrain/obstacle
 - alterar posição bandeira - feito
 
-mountain car: alterar a reward
+TODO:
+- WHAT DO WHEN OUT OF FUEL?
+- ajustar combustivel max/gasto combustivel
+- mostrar barra combustivel na tela?
 
-acrobot: alterar a joint
-
-car racing: raycasts
-
-cart pole: vento lunar
-
-
-basta alterar as opções dos env q ja existem?
