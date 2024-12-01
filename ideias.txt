@@ -1,4 +1,14 @@
-lunar lander: vento lunar (ja existe), limite de combustivel aleatorio, asteroides, tubinas, distancia às bandeiras, add a bonus for landing precisely on a the target, add penality for slow, change terrain/obstacle
+lunar lander: 
+- vento lunar (ja existe) 
+- limite de combustivel aleatorio - feito
+- alterar peso consuante combustivel - feito
+- asteroides
+- turbinas
+- distancia às bandeiras - ja existia
+- add a bonus for landing precisely on a the target
+- add penality for slow - feito
+- change terrain/obstacle
+- alterar posição bandeira - feito
 
 mountain car: alterar a reward
 
