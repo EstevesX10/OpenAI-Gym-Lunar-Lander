@@ -6,42 +6,36 @@ import gymnasium as gym
 from stable_baselines3 import (PPO, DQN)
 from stable_baselines3.common.env_util import (make_vec_env)
 from stable_baselines3.common.vec_env import (SubprocVecEnv)
-from stable_baselines3.common.callbacks import (CheckpointCallback, EveryNTimesteps)
+from stable_baselines3.common.callbacks import (BaseCallback, EveryNTimesteps)
 
 from Configuration import (CONFIG, PATHS_CONFIG)
 
-from stable_baselines3.common.callbacks import BaseCallback
-import datetime
-
 class CustomCheckpointCallback(BaseCallback):
-    def __init__(self, save_path, verbose=0):
+    def __init__(self, check_freq, save_path, verbose=0):
         super().__init__(verbose)
+        self.check_freq = check_freq
         self.save_path = save_path
+        self.last_saved_step = 0
         self.checkFolder(self.save_path)
     
-    def checkFolder(self, path:str) -> None:
-        """
-        # Description
-            -> This method helps ensure that all the nested
-            folders inside a given model path exist.
-        ---------------------------------------------------
-        := param: path - Path in which we we want all the nested folder to exist on.
-        := return: None, since we are only making sure that a path exists.
-        """
-
-        # Define the Folder in which to save the object
+    def checkFolder(self, path: str) -> None:
         folderPath = Path(path)
-        
-        # Check if the directory exists. If not create it
         folderPath.mkdir(parents=True, exist_ok=True)
-
+    
+    def _on_training_start(self) -> None:
+        # Initialize last_saved_step to the current num_timesteps
+        self.last_saved_step = self.num_timesteps
+    
     def _on_step(self) -> bool:
-        # Use the current timestep to name the file
-        step = self.num_timesteps
-        model_path = os.path.join(self.save_path, f"model_step_{step}.zip")
-        self.model.save(model_path)
-        if self.verbose > 0:
-            print(f"Model saved to {model_path}")
+        # Check if the model has crossed the next saving threshold
+        next_save_step = ((self.last_saved_step // self.check_freq) + 1) * self.check_freq
+
+        if self.num_timesteps >= next_save_step:
+            model_path = os.path.join(self.save_path, f"model_step_{next_save_step}.zip")
+            self.model.save(model_path)
+            self.last_saved_step = next_save_step
+            if self.verbose > 0:
+                print(f"Saved model at {model_path}")
         return True
 
 class LunarLanderManager:
@@ -73,9 +67,6 @@ class LunarLanderManager:
         
         # Check if the environment selected is valid
         if (self.envName in ['LunarLander', 'MyLunarLander']):
-            # Create a environment
-            # self.envs = make_vec_env(self.envName, n_envs=CONFIG['N_ENVS'], seed=0, vec_env_cls=SubprocVecEnv)
-
             # Store the name of the Environment (Original or Custom)
             self._envVersion = 'OriginalEnvironment' if self.envName == 'LunarLander' else 'CustomEnvironment'
         else:
@@ -144,7 +135,6 @@ class LunarLanderManager:
         # Return fetched values
         return modelPath, lastestStep
 
-
     def train(self) -> Union[PPO, DQN]:
         """
         # Description
@@ -159,8 +149,6 @@ class LunarLanderManager:
 
         # Fetch the latest model computed and it's corresponding step
         lastestModelPath, latestModelStep = self.getLastestTrainedModelPath()
-
-        print(latestModelStep, lastestModelPath)
 
         # Check if the current configuration of the model has already been computed
         if lastestModelPath is None:
@@ -177,7 +165,7 @@ class LunarLanderManager:
                 model = DQN.load(path=lastestModelPath, env=envs)
             
             # Already trained the model for the designated duration
-            if latestModelStep == CONFIG['N_ITERATIONS']:
+            if latestModelStep >= CONFIG['N_ITERATIONS']:
                 print("Already Trained the Model over the established TimeSteps (Defined inside the CONFIG Dictionary).")
 
                 # Close the Environment
@@ -186,14 +174,18 @@ class LunarLanderManager:
                 # Return the Model
                 return model
 
-        # Define the Callbacks
-        event_callback = EveryNTimesteps(n_steps=self.savingInterval, callback=CustomCheckpointCallback(save_path=self.resultsFolder))
+        # Set the callback's internal state to align with the loaded model's step count
+        checkpointCallback = CustomCheckpointCallback(check_freq=self.savingInterval, save_path=self.resultsFolder)
+        checkpointCallback.num_timesteps = latestModelStep
+        eventCallback = EveryNTimesteps(n_steps=self.savingInterval, callback=checkpointCallback)
+        eventCallback.n_calls = latestModelStep // self.savingInterval
 
-        # Train the Model
-        model.learn(CONFIG['N_ITERATIONS'], progress_bar=True, callback=event_callback, reset_num_timesteps=False)
-
-        # Close the Environment
-        envs.close()
+        try:
+            # Train the Model
+            model.learn(CONFIG['N_ITERATIONS'] - latestModelStep, progress_bar=True, callback=eventCallback, reset_num_timesteps=False)
+        finally:
+            # Close the Environment
+            envs.close()
 
         # Return trained model
         return model
