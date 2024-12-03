@@ -2,21 +2,34 @@ from stable_baselines3.common.utils import get_linear_fn
 
 # Define a Global Dictionary to consider during the development of this Project
 CONFIG = {
-    'MIN_FUEL': 50,            # Minimum Fuel Level of the SpaceCraft
-    'MAX_FUEL': 100,           # Maximum Fuel Level of the SpaceCraft
-    'N_ENVS': 4,               # Number of Environments to consider when training
-    'N_ITERATIONS': 150_000,   # Number of Steps / Iterations to consider during Training
-    'N_EPISODES': 10           # Number of Episodes to Consider
+    'MIN_FUEL': 5,                # Minimum Fuel Level of the SpaceCraft
+    'MAX_FUEL': 10,               # Maximum Fuel Level of the SpaceCraft
+    'N_ENVS': 4,                  # Number of Environments to consider when training
+    'N_ITERATIONS': 500_000,      # Number of Steps / Iterations to consider during Training
+    'N_EPISODES': 10              # Number of Episodes to Consider
 }
 
 PATHS_CONFIG = {
-    'PPO':{
-        'P1': './ExperimentalResults/PPO/P1/'
+    'OriginalEnvironment': {
+        'PPO':{
+            'Settings-1':'./ExperimentalResults/OriginalEnvironment/PPO/Settings-1/',
+            'Settings-2':'./ExperimentalResults/OriginalEnvironment/PPO/Settings-2/'
+        },
+        'DQN':{
+            'Settings-1':'./ExperimentalResults/OriginalEnvironment/DQN/Settings-1/',
+            'Settings-2':'./ExperimentalResults/OriginalEnvironment/DQN/Settings-2/'
+        },
     },
-    'DQN':{
-        'P1': './ExperimentalResults/DQN/P1/'
+    'CustomEnvironment': {
+        'PPO':{
+            'Settings-1':'./ExperimentalResults/CustomEnvironment/PPO/Settings-1/',
+            'Settings-2':'./ExperimentalResults/CustomEnvironment/PPO/Settings-2/'
+        },
+        'DQN':{
+            'Settings-1':'./ExperimentalResults/CustomEnvironment/DQN/Settings-1/',
+            'Settings-2':'./ExperimentalResults/CustomEnvironment/DQN/Settings-2/'
+        },
     },
-    # A2C, ACER - MAYBE
 }
 
 # Define the Settings for the PPO Algorithm
