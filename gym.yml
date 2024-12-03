@@ -86,4 +86,3 @@ dependencies:
       - tzdata==2024.2
       - wcwidth==0.2.13
       - werkzeug==3.1.3
-prefix: C:\Users\Gongas\anaconda3\envs\gym
