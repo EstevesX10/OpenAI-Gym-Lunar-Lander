@@ -216,8 +216,8 @@ class LunarLanderManager:
 
                 # show the environment on the screen
                 env.render()
-                print(ep, rewards, trunc)
-                print("---------------")
+                # print(ep, rewards, trunc)
+                # print("---------------")
 
         # Close the Environment
         env.close()
