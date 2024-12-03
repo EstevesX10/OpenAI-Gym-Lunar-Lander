@@ -189,7 +189,7 @@ class LunarLanderManager:
             evalEnv,
             best_model_save_path=self.resultsFolder + "/bestModel",
             log_path=self.resultsFolder + "/evalLogs",
-            eval_freq=100_000,
+            eval_freq=25_000,
             deterministic=True,
             render=False
         )
@@ -203,6 +203,7 @@ class LunarLanderManager:
         finally:
             # Close the Environment
             envs.close()
+            evalEnv.close()
 
         # Return trained model
         return model
