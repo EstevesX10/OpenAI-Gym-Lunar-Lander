@@ -6,7 +6,7 @@ import gymnasium as gym
 from stable_baselines3 import (PPO, DQN)
 from stable_baselines3.common.env_util import (make_vec_env)
 from stable_baselines3.common.vec_env import (SubprocVecEnv)
-from stable_baselines3.common.callbacks import (BaseCallback, EveryNTimesteps)
+from stable_baselines3.common.callbacks import (BaseCallback, EveryNTimesteps, CallbackList, EvalCallback)
 
 from Configuration import (CONFIG, PATHS_CONFIG)
 
@@ -145,7 +145,10 @@ class LunarLanderManager:
         """
 
         # Create a Environment
-        envs = make_vec_env('LunarLander', n_envs=CONFIG['N_ENVS'], seed=0, vec_env_cls=SubprocVecEnv)
+        envs = make_vec_env(self.envName, n_envs=CONFIG['N_ENVS'], seed=0, vec_env_cls=SubprocVecEnv)
+
+        # Create a separate evaluation environment
+        evalEnv = gym.make(self.envName)
 
         # Fetch the latest model computed and it's corresponding step
         lastestModelPath, latestModelStep = self.getLastestTrainedModelPath()
@@ -168,8 +171,9 @@ class LunarLanderManager:
             if latestModelStep >= CONFIG['N_ITERATIONS']:
                 print("Already Trained the Model over the established TimeSteps (Defined inside the CONFIG Dictionary).")
 
-                # Close the Environment
+                # Close the Environments
                 envs.close()
+                evalEnv.close()
 
                 # Return the Model
                 return model
@@ -180,9 +184,22 @@ class LunarLanderManager:
         eventCallback = EveryNTimesteps(n_steps=self.savingInterval, callback=checkpointCallback)
         eventCallback.n_calls = latestModelStep // self.savingInterval
 
+        # Define the evaluation callback
+        evalCallback = EvalCallback(
+            evalEnv,
+            best_model_save_path=self.resultsFolder + "/bestModel",
+            log_path=self.resultsFolder + "/evalLogs",
+            eval_freq=100_000,
+            deterministic=True,
+            render=False
+        )
+
+        # Combine callbacks using CallbackList
+        combinedCallbacks = CallbackList([eventCallback, evalCallback])
+
         try:
             # Train the Model
-            model.learn(CONFIG['N_ITERATIONS'] - latestModelStep, progress_bar=True, callback=eventCallback, reset_num_timesteps=False)
+            model.learn(CONFIG['N_ITERATIONS'] - latestModelStep, progress_bar=True, callback=combinedCallbacks, reset_num_timesteps=False)
         finally:
             # Close the Environment
             envs.close()
