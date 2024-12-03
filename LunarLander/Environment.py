@@ -22,9 +22,6 @@ from Box2D.b2 import (
 
 from Configuration import (CONFIG)
 
-MIN_FUEL = CONFIG['MIN_FUEL']
-MAX_FUEL = CONFIG['MAX_FUEL']
-
 class Action:
     NOTHING = 0
     LEFT = 1
@@ -175,7 +172,7 @@ class MyLunarLander(LunarLander):
 
         #####################
 
-        self._cur_fuel = random.uniform(MIN_FUEL, MAX_FUEL)
+        self._cur_fuel = random.uniform(CONFIG['MIN_FUEL'], CONFIG['MAX_FUEL'])
         return self.step(np.array([0, 0]) if self.continuous else 0)[0], {}
             
 
