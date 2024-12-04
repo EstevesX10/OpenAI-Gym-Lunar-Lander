@@ -1,14 +1,33 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING, Optional
 import random
 import gymnasium as gym
-from gymnasium.envs.box2d.lunar_lander import (LunarLander,
-                                               ContactDetector, FPS, SCALE, MAIN_ENGINE_POWER,
-                                               SIDE_ENGINE_POWER, INITIAL_RANDOM, LANDER_POLY,
-                                               LEG_AWAY, LEG_DOWN, LEG_W, LEG_H, LEG_SPRING_TORQUE,
-                                               SIDE_ENGINE_HEIGHT, SIDE_ENGINE_AWAY, MAIN_ENGINE_Y_LOCATION,
-                                               VIEWPORT_W, VIEWPORT_H)
+from gymnasium import spaces
+from gymnasium.envs.box2d.lunar_lander import (
+    LunarLander,
+    ContactDetector,
+    FPS,
+    SCALE,
+    MAIN_ENGINE_POWER,
+    SIDE_ENGINE_POWER,
+    INITIAL_RANDOM,
+    LANDER_POLY,
+    LEG_AWAY,
+    LEG_DOWN,
+    LEG_W,
+    LEG_H,
+    LEG_SPRING_TORQUE,
+    SIDE_ENGINE_HEIGHT,
+    SIDE_ENGINE_AWAY,
+    MAIN_ENGINE_Y_LOCATION,
+    VIEWPORT_W,
+    VIEWPORT_H,
+)
+from gymnasium.utils import EzPickle
 import numpy as np
 import math
+
+if TYPE_CHECKING:
+    import pygame
 
 import Box2D
 from Box2D.b2 import (
@@ -20,7 +39,8 @@ from Box2D.b2 import (
     revoluteJointDef,
 )
 
-from Configuration import (CONFIG)
+from Configuration import CONFIG
+
 
 class Action:
     NOTHING = 0
@@ -28,17 +48,19 @@ class Action:
     DOWN = 2
     RIGHT = 3
 
+
 class MyLunarLander(LunarLander):
     def __init__(
+        self,
+        render_mode: Optional[str] = None,
+        continuous: bool = False,
+        gravity: float = -10.0,
+        enable_wind: bool = False,
+        wind_power: float = 15.0,
+        turbulence_power: float = 1.5,
+    ):
+        EzPickle.__init__(
             self,
-            render_mode: Optional[str] = None,
-            continuous: bool = False,
-            gravity: float = -10.0,
-            enable_wind: bool = False,
-            wind_power: float = 15.0,
-            turbulence_power: float = 1.5,
-        ):
-        super().__init__(        
             render_mode,
             continuous,
             gravity,
@@ -47,6 +69,85 @@ class MyLunarLander(LunarLander):
             turbulence_power,
         )
 
+        assert (
+            -12.0 < gravity and gravity < 0.0
+        ), f"gravity (current value: {gravity}) must be between -12 and 0"
+        self.gravity = gravity
+
+        if 0.0 > wind_power or wind_power > 20.0:
+            gym.logger.warn(
+                f"wind_power value is recommended to be between 0.0 and 20.0, (current value: {wind_power})"
+            )
+        self.wind_power = wind_power
+
+        if 0.0 > turbulence_power or turbulence_power > 2.0:
+            gym.logger.warn(
+                f"turbulence_power value is recommended to be between 0.0 and 2.0, (current value: {turbulence_power})"
+            )
+        self.turbulence_power = turbulence_power
+
+        self.enable_wind = enable_wind
+
+        self.screen: pygame.Surface = None
+        self.clock = None
+        self.isopen = True
+        self.world = Box2D.b2World(gravity=(0, gravity))
+        self.moon = None
+        self.lander: Optional[Box2D.b2Body] = None
+        self.particles = []
+
+        self.prev_reward = None
+
+        self.continuous = continuous
+
+        low = np.array(
+            [
+                # these are bounds for position
+                # realistically the environment should have ended
+                # long before we reach more than 50% outside
+                -2.5,  # x coordinate
+                -2.5,  # y coordinate
+                # velocity bounds is 5x rated speed
+                -10.0,
+                -10.0,
+                -2 * math.pi,
+                -10.0,
+                -0.0,
+                -0.0,
+                0.0,  # current fuel - NEW
+            ]
+        ).astype(np.float32)
+        high = np.array(
+            [
+                # these are bounds for position
+                # realistically the environment should have ended
+                # long before we reach more than 50% outside
+                2.5,  # x coordinate
+                2.5,  # y coordinate
+                # velocity bounds is 5x rated speed
+                10.0,
+                10.0,
+                2 * math.pi,
+                10.0,
+                1.0,
+                1.0,
+                1.0,  # current fuel - NEW
+            ]
+        ).astype(np.float32)
+
+        # useful range is -1 .. +1, but spikes can be higher
+        self.observation_space = spaces.Box(low, high)
+
+        if self.continuous:
+            # Action is two floats [main engine, left-right engines].
+            # Main engine: -1..0 off, 0..+1 throttle from 50% to 100% power. Engine can't work with less than 50% power.
+            # Left-right:  -1.0..-0.5 fire left engine, +0.5..+1.0 fire right engine, -0.5..0.5 off
+            self.action_space = spaces.Box(-1, +1, (2,), dtype=np.float32)
+        else:
+            # Nop, fire left engine, main engine, right engine
+            self.action_space = spaces.Discrete(4)
+
+        self.render_mode = render_mode
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         self._destroy()
@@ -172,9 +273,8 @@ class MyLunarLander(LunarLander):
 
         #####################
 
-        self._cur_fuel = random.uniform(CONFIG['MIN_FUEL'], CONFIG['MAX_FUEL'])
+        self._cur_fuel = random.uniform(CONFIG["MIN_FUEL"], CONFIG["MAX_FUEL"])
         return self.step(np.array([0, 0]) if self.continuous else 0)[0], {}
-            
 
     def step(self, action):
         assert self.lander is not None
@@ -330,7 +430,8 @@ class MyLunarLander(LunarLander):
         vel = self.lander.linearVelocity
 
         state = [
-            (pos.x - (self.helipad_x1 + self.helipad_x2) / 2) / (VIEWPORT_W / SCALE / 2),
+            (pos.x - (self.helipad_x1 + self.helipad_x2) / 2)
+            / (VIEWPORT_W / SCALE / 2),
             (pos.y - (self.helipad_y + LEG_DOWN / SCALE)) / (VIEWPORT_H / SCALE / 2),
             vel.x * (VIEWPORT_W / SCALE / 2) / FPS,
             vel.y * (VIEWPORT_H / SCALE / 2) / FPS,
@@ -381,16 +482,19 @@ class MyLunarLander(LunarLander):
             used_fuel = 0.03
         self._cur_fuel -= used_fuel
 
+        # Add current fuel to observations
+        state.append(self._cur_fuel / CONFIG["MAX_FUEL"])
+
         # Update lander density
-        self.lander.fixtures[0].density = 5.0 + self._cur_fuel / 10
-        
+        self.lander.fixtures[0].density = 5.0 + self._cur_fuel / CONFIG["MAX_FUEL"]
+
+        # Move faster!!!!
+        reward -= 0.005
+
         if self._cur_fuel <= 0:
             # Out of fuel
             terminated = True
             reward = -100
-
-        # Move faster!!!!
-        reward -= 0.005
 
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
         return np.array(state, dtype=np.float32), reward, terminated, False, {}

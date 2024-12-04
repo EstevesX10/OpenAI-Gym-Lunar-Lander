@@ -1,14 +1,21 @@
-from typing import (Tuple, Union)
+from typing import Tuple, Union
 import os
-from pathlib import (Path)
+from pathlib import Path
 import gymnasium as gym
 
-from stable_baselines3 import (PPO, DQN)
-from stable_baselines3.common.env_util import (make_vec_env)
-from stable_baselines3.common.vec_env import (SubprocVecEnv)
-from stable_baselines3.common.callbacks import (BaseCallback, EveryNTimesteps, CallbackList, EvalCallback)
+from stable_baselines3 import PPO, DQN
+from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3.common.callbacks import (
+    BaseCallback,
+    EveryNTimesteps,
+    CallbackList,
+    EvalCallback,
+)
 
-from Configuration import (CONFIG, PATHS_CONFIG)
+from Environment import MyLunarLander
+from Configuration import CONFIG, PATHS_CONFIG
+
 
 class CustomCheckpointCallback(BaseCallback):
     def __init__(self, check_freq, save_path, verbose=0):
@@ -17,33 +24,44 @@ class CustomCheckpointCallback(BaseCallback):
         self.save_path = save_path
         self.last_saved_step = 0
         self.checkFolder(self.save_path)
-    
+
     def checkFolder(self, path: str) -> None:
         folderPath = Path(path)
         folderPath.mkdir(parents=True, exist_ok=True)
-    
+
     def _on_training_start(self) -> None:
         # Initialize last_saved_step to the current num_timesteps
         self.last_saved_step = self.num_timesteps
-    
+
     def _on_step(self) -> bool:
         # Check if the model has crossed the next saving threshold
-        next_save_step = ((self.last_saved_step // self.check_freq) + 1) * self.check_freq
+        next_save_step = (
+            (self.last_saved_step // self.check_freq) + 1
+        ) * self.check_freq
 
         if self.num_timesteps >= next_save_step:
-            model_path = os.path.join(self.save_path, f"model_step_{next_save_step}.zip")
+            model_path = os.path.join(
+                self.save_path, f"model_step_{next_save_step}.zip"
+            )
             self.model.save(model_path)
             self.last_saved_step = next_save_step
             if self.verbose > 0:
                 print(f"Saved model at {model_path}")
         return True
 
+
 class LunarLanderManager:
-    def __init__(self, environmentName:str, algorithm:str, settingsNumber:int, algorithmSettings:dict) -> None:
+    def __init__(
+        self,
+        environmentName: str,
+        algorithm: str,
+        settingsNumber: int,
+        algorithmSettings: dict,
+    ) -> None:
         """
         # Description
             -> Constructor of the class LunarLanderManager. It helps instanciate any
-            object of the class LunarLanderManager. This class helps train and test 
+            object of the class LunarLanderManager. This class helps train and test
             a given Reinforcemente Learning Algorithm upon a selected Environment.
         ----------------------------------------------------------------------------
         := param: environmentName - Name of the Environment to Use (either 'LunarLander' or 'MyLunarLander').
@@ -58,27 +76,35 @@ class LunarLanderManager:
         self.algorithm = algorithm
         self.settingsNumber = settingsNumber
         self.algorithmSettings = algorithmSettings
-        
+
         # Define the Policy
         self.policy = "MlpPolicy"
 
         # Define the interval in which to save the model
         self.savingInterval = 100_000
-        
+
         # Check if the environment selected is valid
-        if (self.envName in ['LunarLander', 'MyLunarLander']):
+        if self.envName in ["LunarLander", "MyLunarLander"]:
             # Store the name of the Environment (Original or Custom)
-            self._envVersion = 'OriginalEnvironment' if self.envName == 'LunarLander' else 'CustomEnvironment'
+            self._envVersion = (
+                "OriginalEnvironment"
+                if self.envName == "LunarLander"
+                else "CustomEnvironment"
+            )
         else:
             # Invalid Environment Selected
             raise ValueError("Invalid Lunar Lander Environment selected!")
-        
+
         # Check if the given algorithm is valid
-        if (self.algorithm not in ['PPO', 'DQN']):
-            raise ValueError("Invalid Algorithm selected! (Please choose between PPO or DQN)")
-        
+        if self.algorithm not in ["PPO", "DQN"]:
+            raise ValueError(
+                "Invalid Algorithm selected! (Please choose between PPO or DQN)"
+            )
+
         # Define the Folder in which to store the results
-        self.resultsFolder = PATHS_CONFIG[self._envVersion][self.algorithm][f"Settings-{self.settingsNumber}"]
+        self.resultsFolder = PATHS_CONFIG[self._envVersion][self.algorithm][
+            f"Settings-{self.settingsNumber}"
+        ]
 
     def isResultsFolderEmpty(self) -> bool:
         """
@@ -94,7 +120,7 @@ class LunarLanderManager:
         # Check if it is empty
         return folder.exists() and folder.is_dir() and not any(folder.iterdir())
 
-    def hasComputedStep(self, step:int) -> bool:
+    def hasComputedStep(self, step: int) -> bool:
         """
         # Description
             -> This method helps determine if the model has computed a certain step.
@@ -107,7 +133,9 @@ class LunarLanderManager:
         file_name = f"model_step_{step}.zip"
 
         # Check if the folder exists and if the specific file is in it
-        return os.path.exists(self.resultsFolder) and file_name in os.listdir(self.resultsFolder)
+        return os.path.exists(self.resultsFolder) and file_name in os.listdir(
+            self.resultsFolder
+        )
 
     def getLastestTrainedModelPath(self) -> Tuple[str, int]:
         """
@@ -124,7 +152,9 @@ class LunarLanderManager:
         # Define a variable for the latest performed step
         lastestStep = 0
 
-        for step in range (self.savingInterval, CONFIG['N_ITERATIONS'] + 1, self.savingInterval):
+        for step in range(
+            self.savingInterval, CONFIG["N_ITERATIONS"] + 1, self.savingInterval
+        ):
             if self.hasComputedStep(step=step):
                 # Update the model path
                 modelPath = self.resultsFolder + f"model_step_{step}.zip"
@@ -144,8 +174,17 @@ class LunarLanderManager:
         := return: Trained Model.
         """
 
+        def registerAndMake():
+            gym.register(
+                id="MyLunarLander",
+                entry_point=MyLunarLander,
+            )
+            return gym.make(self.envName)
+
         # Create a Environment
-        envs = make_vec_env(self.envName, n_envs=CONFIG['N_ENVS'], seed=0, vec_env_cls=SubprocVecEnv)
+        envs = make_vec_env(
+            registerAndMake, n_envs=CONFIG["N_ENVS"], seed=0, vec_env_cls=SubprocVecEnv
+        )
 
         # Create a separate evaluation environment
         evalEnv = gym.make(self.envName)
@@ -156,20 +195,34 @@ class LunarLanderManager:
         # Check if the current configuration of the model has already been computed
         if lastestModelPath is None:
             # Define the Reinforcement Learning Model
-            if self.algorithm == 'PPO':
-                model = PPO(policy=self.policy, env=envs, device='cpu', verbose=1, **self.algorithmSettings)
+            if self.algorithm == "PPO":
+                model = PPO(
+                    policy=self.policy,
+                    env=envs,
+                    device="cpu",
+                    verbose=1,
+                    **self.algorithmSettings,
+                )
             else:
-                model = DQN(policy=self.policy, env=envs, device='cpu', verbose=1, **self.algorithmSettings)
+                model = DQN(
+                    policy=self.policy,
+                    env=envs,
+                    device="cpu",
+                    verbose=1,
+                    **self.algorithmSettings,
+                )
         else:
             # The model can be further trained
-            if self.algorithm == 'PPO':
+            if self.algorithm == "PPO":
                 model = PPO.load(path=lastestModelPath, env=envs)
             else:
                 model = DQN.load(path=lastestModelPath, env=envs)
-            
+
             # Already trained the model for the designated duration
-            if latestModelStep >= CONFIG['N_ITERATIONS']:
-                print("Already Trained the Model over the established TimeSteps (Defined inside the CONFIG Dictionary).")
+            if latestModelStep >= CONFIG["N_ITERATIONS"]:
+                print(
+                    "Already Trained the Model over the established TimeSteps (Defined inside the CONFIG Dictionary)."
+                )
 
                 # Close the Environments
                 envs.close()
@@ -179,9 +232,13 @@ class LunarLanderManager:
                 return model
 
         # Set the callback's internal state to align with the loaded model's step count
-        checkpointCallback = CustomCheckpointCallback(check_freq=self.savingInterval, save_path=self.resultsFolder)
+        checkpointCallback = CustomCheckpointCallback(
+            check_freq=self.savingInterval, save_path=self.resultsFolder
+        )
         checkpointCallback.num_timesteps = latestModelStep
-        eventCallback = EveryNTimesteps(n_steps=self.savingInterval, callback=checkpointCallback)
+        eventCallback = EveryNTimesteps(
+            n_steps=self.savingInterval, callback=checkpointCallback
+        )
         eventCallback.n_calls = latestModelStep // self.savingInterval
 
         # Define the evaluation callback
@@ -189,17 +246,21 @@ class LunarLanderManager:
             evalEnv,
             best_model_save_path=self.resultsFolder + "/bestModel",
             log_path=self.resultsFolder + "/evalLogs",
-            eval_freq=100_000,
+            eval_freq=25_000,
             deterministic=True,
-            render=False
+            render=False,
         )
 
         # Combine callbacks using CallbackList
-        combinedCallbacks = CallbackList([eventCallback, evalCallback])
+        combinedCallbacks = CallbackList([evalCallback, eventCallback])
 
         try:
             # Train the Model
-            model.learn(CONFIG['N_ITERATIONS'] - latestModelStep, progress_bar=True, callback=combinedCallbacks, reset_num_timesteps=False)
+            model.learn(
+                CONFIG["N_ITERATIONS"] - latestModelStep,
+                callback=combinedCallbacks,
+                reset_num_timesteps=False,
+            )
         finally:
             # Close the Environment
             envs.close()
@@ -207,7 +268,9 @@ class LunarLanderManager:
         # Return trained model
         return model
 
-    def test(self, model:Union[PPO, DQN], numEpisodes:int=CONFIG['N_EPISODES']) -> None:
+    def test(
+        self, model: Union[PPO, DQN], numEpisodes: int = CONFIG["N_EPISODES"]
+    ) -> None:
         """
         # Description
             -> This method allows to test a given model upon the selected Environment.
@@ -259,7 +322,9 @@ class LunarLanderManager:
         # PerfORM a Episode
         while not episode_over:
             # Choose a random action
-            action = env.action_space.sample()  # agent policy that uses the observation and info
+            action = (
+                env.action_space.sample()
+            )  # agent policy that uses the observation and info
 
             # Perform a Action / Step
             observation, reward, terminated, truncated, info = env.step(action)
