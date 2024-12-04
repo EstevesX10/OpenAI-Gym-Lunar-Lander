@@ -264,6 +264,7 @@ class LunarLanderManager:
         finally:
             # Close the Environment
             envs.close()
+            evalEnv.close()
 
         # Return trained model
         return model
