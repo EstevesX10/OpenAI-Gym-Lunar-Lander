@@ -49,7 +49,6 @@ class CustomCheckpointCallback(BaseCallback):
                 print(f"Saved model at {model_path}")
         return True
 
-
 class LunarLanderManager:
     def __init__(
         self,
@@ -270,7 +269,7 @@ class LunarLanderManager:
         return model
 
     def test(
-        self, model: Union[PPO, DQN], numEpisodes: int = CONFIG["N_EPISODES"]
+        self, model: Union[PPO, DQN]=None, numEpisodes: int = CONFIG["N_EPISODES"]
     ) -> None:
         """
         # Description
@@ -283,6 +282,23 @@ class LunarLanderManager:
 
         # Define a Environment
         env = gym.make(self.envName, render_mode="human")
+
+        # Check if a model was given    
+        if model is None:
+            # Define Model Path
+            bestModelPath = f"./ExperimentalResults/{self._envVersion}/{self.algorithm}/Settings-{self.settingsNumber}/bestModel/best_model.zip"
+
+            # PPO Algorithm
+            if (self.algorithm == "PPO"):
+                model = PPO.load(path=bestModelPath, env=env)
+            # DQN Algorithm
+            elif (self.algorithm == "DQN"):
+                model = DQN.load(path=bestModelPath, env=env)
+            else:
+                # Close the Environment
+                env.close()
+                # Raise Error
+                raise ValueError("Unsupported Algorithm Chosen!")
 
         # Perform N Episodes
         for ep in range(numEpisodes):
