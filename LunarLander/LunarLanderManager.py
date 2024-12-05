@@ -1,6 +1,8 @@
 from typing import Tuple, Union
 import os
 from pathlib import Path
+import numpy as np
+import matplotlib.pyplot as plt
 import gymnasium as gym
 
 from stable_baselines3 import PPO, DQN
@@ -352,3 +354,73 @@ class LunarLanderManager:
 
         # Close the Environment
         env.close()
+    
+    def checkResults(self) -> None:
+        """
+        # Description
+            -> This method aims to evaluate the performance of the model after training.
+        --------------------------------------------------------------------------------
+        := return: None, since we are only plotting data.
+        """
+
+        # Define the path to the results
+        resultsPath = f"./ExperimentalResults/{self._envVersion}/{self.algorithm}/Settings-{self.settingsNumber}/evalLogs/evaluations.npz"
+
+        # Check if the file exists
+        if not os.path.exists(resultsPath):
+            # The results have not been computed
+            raise ValueError("The Results have not yet been Computed!")
+
+        # Creating the figure and subplots
+        fig, axs = plt.subplots(1, 2, figsize=(12, 4))  # 3 rows, 1 column
+
+        # Load the collected data
+        data = np.load(resultsPath)
+
+        # Extract mean and standard deviation for rewards
+        meanRewards = np.mean(data['results'], axis=1)
+        stdRewards = np.std(data['results'], axis=1)
+
+        # Extract mean and standard deviation for episode lengths
+        meanEpisodeLengths = np.mean(data['ep_lengths'], axis=1)
+        stdEpisodeLengths = np.std(data['ep_lengths'], axis=1)
+
+        # Plot Rewards with standard deviation
+        axs[0].plot(data['timesteps'], meanRewards, label="Reward")
+        axs[0].fill_between(
+            data['timesteps'],
+            meanRewards - stdRewards,
+            meanRewards + stdRewards,
+            color='blue',
+            alpha=0.2,
+            label="Std Dev"
+        )
+        axs[0].set_title("Reward")
+        axs[0].set_xlabel("TimeSteps")
+        axs[0].set_ylabel("Reward")
+        axs[0].legend()
+        axs[0].grid(True)
+
+        # Plot Episode Lengths with standard deviation
+        axs[1].plot(data['timesteps'], meanEpisodeLengths, label="Episode Lengths", color="red")
+        axs[1].fill_between(
+            data['timesteps'],
+            meanEpisodeLengths - stdEpisodeLengths,
+            meanEpisodeLengths + stdEpisodeLengths,
+            color='red',
+            alpha=0.2,
+            label="Std Dev"
+        )
+        axs[1].set_title("Episode Lengths")
+        axs[1].set_xlabel("TimeSteps")
+        axs[1].set_ylabel("Episode Lengths")
+        axs[1].legend()
+        axs[1].grid(True)
+
+        fig.suptitle(f"[{self._envVersion}] {self.algorithm} Performance Evaluation", fontsize=16)
+
+        # Adjust layout to prevent overlapping
+        plt.tight_layout()
+
+        # Show the plot
+        plt.show()
