@@ -418,23 +418,6 @@ class LunarLanderManager:
 
         fig.suptitle(f"[{self._envVersion}] {self.algorithm} Performance Evaluation", fontsize=16)
 
-
-        # # Plot 1: Sine
-        # axs[0].plot(data['timesteps'], np.mean(data['results'], axis=1), label="Reward")
-        # axs[0].set_title("Reward")
-        # axs[0].set_xlabel("TimeSteps")
-        # axs[0].set_ylabel("Reward")
-        # axs[0].legend()
-        # axs[0].grid(True)
-
-        # # Plot 2: Cosine
-        # axs[1].plot(data['timesteps'], np.mean(data['ep_lengths'], axis=1), label="Episode Lengths", color="red")
-        # axs[1].set_title("Episode Lengths")
-        # axs[1].set_xlabel("TimeSteps")
-        # axs[1].set_ylabel("Episode Lengths")
-        # axs[1].legend()
-        # axs[1].grid(True)
-
         # Adjust layout to prevent overlapping
         plt.tight_layout()
 

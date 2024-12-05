@@ -1,9 +1,9 @@
 <div align="center">
-    <h1>Gym-RL-Project-ISIA</h1>
+    <h1>Lunar Lander</h1>
 </div>
 
 <p align="center" width="100%">
-    <img src="./LunarLander/Assets/#" width="55%" height="55%" alt="Multi-Agent Autonomous Waste Collection System"/>
+    <img src="./LunarLander/Assets/Spacecraft.jpg" width="55%" height="55%" alt="Multi-Agent Autonomous Waste Collection System"/>
 </p>
 
 <div align="center">
