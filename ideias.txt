@@ -12,6 +12,8 @@ lunar lander:
 
 TODO:
 - WHAT DO WHEN OUT OF FUEL?
-- ajustar combustivel max/gasto combustivel
+- ajustar combustivel max/gasto combustivel - feito
 - mostrar barra combustivel na tela?
+- curvas (talvez do evalLogs)
+- terminar ao atingir score ~210?
 
