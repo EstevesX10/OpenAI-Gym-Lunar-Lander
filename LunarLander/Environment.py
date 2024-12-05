@@ -23,6 +23,7 @@ from gymnasium.envs.box2d.lunar_lander import (
     VIEWPORT_H,
 )
 from gymnasium.utils import EzPickle
+from gymnasium.error import DependencyNotInstalled
 import numpy as np
 import math
 
@@ -212,8 +213,8 @@ class MyLunarLander(LunarLander):
                 restitution=0.0,
             ),  # 0.99 bouncy
         )
-        self.lander.color1 = (128, 102, 230)
-        self.lander.color2 = (77, 77, 128)
+        self.lander.color1 = (168, 146, 163)  # (128, 102, 230)
+        self.lander.color2 = (144, 121, 137)  # (77, 77, 128)
 
         # Apply the initial random impulse to the lander
         self.lander.ApplyForceToCenter(
@@ -243,8 +244,9 @@ class MyLunarLander(LunarLander):
                 ),
             )
             leg.ground_contact = False
-            leg.color1 = (128, 102, 230)
-            leg.color2 = (77, 77, 128)
+
+            leg.color1 = (168, 146, 163)  # (128, 102, 230)
+            leg.color2 = (144, 121, 137)  # (77, 77, 128)
             rjd = revoluteJointDef(
                 bodyA=self.lander,
                 bodyB=leg,
@@ -268,12 +270,11 @@ class MyLunarLander(LunarLander):
 
         self.drawlist = [self.lander] + self.legs
 
+        self._cur_fuel = random.uniform(CONFIG["MIN_FUEL"], CONFIG["MAX_FUEL"])  # NEW
+
         if self.render_mode == "human":
             self.render()
 
-        #####################
-
-        self._cur_fuel = random.uniform(CONFIG["MIN_FUEL"], CONFIG["MAX_FUEL"])
         return self.step(np.array([0, 0]) if self.continuous else 0)[0], {}
 
     def step(self, action):
@@ -498,3 +499,152 @@ class MyLunarLander(LunarLander):
 
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
         return np.array(state, dtype=np.float32), reward, terminated, False, {}
+
+    def render(self):
+        if self.render_mode is None:
+            assert self.spec is not None
+            gym.logger.warn(
+                "You are calling render method without specifying any render mode. "
+                "You can specify the render_mode at initialization, "
+                f'e.g. gym.make("{self.spec.id}", render_mode="rgb_array")'
+            )
+            return
+
+        try:
+            import pygame
+            from pygame import gfxdraw
+        except ImportError as e:
+            raise DependencyNotInstalled(
+                'pygame is not installed, run `pip install "gymnasium[box2d]"`'
+            ) from e
+
+        if self.screen is None and self.render_mode == "human":
+            pygame.init()
+            pygame.display.init()
+            self.screen = pygame.display.set_mode((VIEWPORT_W, VIEWPORT_H))
+        if self.clock is None:
+            self.clock = pygame.time.Clock()
+
+        self.surf = pygame.Surface((VIEWPORT_W, VIEWPORT_H))
+
+        pygame.transform.scale(self.surf, (SCALE, SCALE))
+        pygame.draw.rect(self.surf, (138, 75, 91), self.surf.get_rect())
+
+        for obj in self.particles:
+            obj.ttl -= 0.15
+            obj.color1 = (
+                int(max(0.2, 0.15 + obj.ttl) * 255),
+                int(max(0.2, 0.5 * obj.ttl) * 255),
+                int(max(0.2, 0.5 * obj.ttl) * 255),
+            )
+            obj.color2 = (
+                int(max(0.2, 0.15 + obj.ttl) * 255),
+                int(max(0.2, 0.5 * obj.ttl) * 255),
+                int(max(0.2, 0.5 * obj.ttl) * 255),
+            )
+
+        self._clean_particles(False)
+
+        for p in self.sky_polys:
+            scaled_poly = []
+            for coord in p:
+                scaled_poly.append((coord[0] * SCALE, coord[1] * SCALE))
+            pygame.draw.polygon(self.surf, (47, 37, 43), scaled_poly)
+            gfxdraw.aapolygon(self.surf, scaled_poly, (47, 37, 43))
+
+        for obj in self.particles + self.drawlist:
+            for f in obj.fixtures:
+                trans = f.body.transform
+                if type(f.shape) is circleShape:
+                    pygame.draw.circle(
+                        self.surf,
+                        color=obj.color1,
+                        center=trans * f.shape.pos * SCALE,
+                        radius=f.shape.radius * SCALE,
+                    )
+                    pygame.draw.circle(
+                        self.surf,
+                        color=obj.color2,
+                        center=trans * f.shape.pos * SCALE,
+                        radius=f.shape.radius * SCALE,
+                    )
+
+                else:
+                    path = [trans * v * SCALE for v in f.shape.vertices]
+                    pygame.draw.polygon(self.surf, color=obj.color1, points=path)
+                    gfxdraw.aapolygon(self.surf, path, obj.color1)
+                    pygame.draw.aalines(
+                        self.surf, color=obj.color2, points=path, closed=True
+                    )
+
+                for x in [self.helipad_x1, self.helipad_x2]:
+                    x = x * SCALE
+                    flagy1 = self.helipad_y * SCALE
+                    flagy2 = flagy1 + 50
+                    pygame.draw.line(
+                        self.surf,
+                        color=(255, 255, 255),
+                        start_pos=(x, flagy1),
+                        end_pos=(x, flagy2),
+                        width=1,
+                    )
+                    pygame.draw.polygon(
+                        self.surf,
+                        color=(150, 60, 70),  # (204, 204, 0),
+                        points=[
+                            (x, flagy2),
+                            (x, flagy2 - 10),
+                            (x + 25, flagy2 - 5),
+                        ],
+                    )
+                    gfxdraw.aapolygon(
+                        self.surf,
+                        [(x, flagy2), (x, flagy2 - 10), (x + 25, flagy2 - 5)],
+                        (150, 60, 70),  # (204, 204, 0),
+                    )
+
+        ###########
+
+        # Define colors
+        bar_color = (0, 128, 0)  # Green progress bar
+        border_color = (0, 0, 0)  # Black border for the bar
+
+        # Progress bar parameters
+        bar_width = 0.3 * SCALE
+        bar_height = 5 * SCALE
+        bar_x = (VIEWPORT_W - bar_width) * 0.97
+        bar_y = VIEWPORT_H // 2
+
+        # Draw the background of the progress bar
+        pygame.draw.rect(
+            self.surf,
+            border_color,
+            (bar_x - 2, bar_y - 2, bar_width + 4, bar_height + 4),
+        )  # Border
+        pygame.draw.rect(
+            self.surf, (200, 200, 200), (bar_x, bar_y, bar_width, bar_height)
+        )  # Background (gray)
+
+        # Draw the filled portion based on progress (progress is between 0 and 1)
+        fuel_pct = self._cur_fuel / CONFIG["MAX_FUEL"]
+        fill_height = fuel_pct * bar_height
+        pygame.draw.rect(
+            self.surf,
+            bar_color,
+            (bar_x, bar_y + bar_height - fill_height, bar_width, fill_height),
+        )  # Filled portion
+
+        ###########
+
+        self.surf = pygame.transform.flip(self.surf, False, True)
+
+        if self.render_mode == "human":
+            assert self.screen is not None
+            self.screen.blit(self.surf, (0, 0))
+            pygame.event.pump()
+            self.clock.tick(self.metadata["render_fps"])
+            pygame.display.flip()
+        elif self.render_mode == "rgb_array":
+            return np.transpose(
+                np.array(pygame.surfarray.pixels3d(self.surf)), axes=(1, 0, 2)
+            )
