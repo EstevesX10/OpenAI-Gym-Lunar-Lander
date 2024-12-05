@@ -5,7 +5,7 @@ CONFIG = {
     "MIN_FUEL": 9,  # Minimum Fuel Level of the SpaceCraft
     "MAX_FUEL": 13,  # Maximum Fuel Level of the SpaceCraft
     "N_ENVS": 4,  # Number of Environments to consider when training
-    "N_ITERATIONS": 5_000_000,  # Number of Steps / Iterations to consider during Training
+    "N_ITERATIONS": 30_000_000,  # Number of Steps / Iterations to consider during Training
     "N_EPISODES": 10,  # Number of Episodes to Consider
 }
 

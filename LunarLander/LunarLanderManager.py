@@ -247,7 +247,7 @@ class LunarLanderManager:
             evalEnv,
             best_model_save_path=self.resultsFolder + "/bestModel",
             log_path=self.resultsFolder + "/evalLogs",
-            eval_freq=25_000,
+            eval_freq=12_500,
             deterministic=True,
             render=False,
         )
