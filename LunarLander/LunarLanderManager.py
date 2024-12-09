@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple, Union, Callable
 import os
 from pathlib import Path
 import numpy as np
@@ -355,7 +355,7 @@ class LunarLanderManager:
         # Close the Environment
         env.close()
     
-    def checkResults(self) -> None:
+    def checkResults(self) -> np.lib.npyio.NpzFile:
         """
         # Description
             -> This method aims to evaluate the performance of the model after training.
@@ -424,3 +424,6 @@ class LunarLanderManager:
 
         # Show the plot
         plt.show()
+
+        # Return the Results
+        return data
