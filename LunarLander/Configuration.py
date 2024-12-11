@@ -5,7 +5,7 @@ CONFIG = {
     "MIN_FUEL": 9,  # Minimum Fuel Level of the SpaceCraft
     "MAX_FUEL": 13,  # Maximum Fuel Level of the SpaceCraft
     "N_ENVS": 4,  # Number of Environments to consider when training
-    "N_ITERATIONS": 30_000_000,  # Number of Steps / Iterations to consider during Training
+    "N_ITERATIONS": 10_000_000,  # Number of Steps / Iterations to consider during Training
     "N_EPISODES": 10,  # Number of Episodes to Consider
 }
 
@@ -13,7 +13,6 @@ PATHS_CONFIG = {
     "OriginalEnvironment": {
         "PPO": {
             "Settings-1": "./ExperimentalResults/OriginalEnvironment/PPO/Settings-1/",
-            "Settings-2": "./ExperimentalResults/OriginalEnvironment/PPO/Settings-2/",
         },
         "DQN": {
             "Settings-1": "./ExperimentalResults/OriginalEnvironment/DQN/Settings-1/",
@@ -26,6 +25,7 @@ PATHS_CONFIG = {
         },
         "DQN": {
             "Settings-1": "./ExperimentalResults/CustomEnvironment/DQN/Settings-1/",
+            "Settings-2": "./ExperimentalResults/CustomEnvironment/DQN/Settings-2/",
         },
     },
 }

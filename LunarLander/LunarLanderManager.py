@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple, Union, Callable
 import os
 from pathlib import Path
 import numpy as np
@@ -355,7 +355,7 @@ class LunarLanderManager:
         # Close the Environment
         env.close()
 
-    def checkResults(self) -> None:
+    def checkResults(self) -> np.lib.npyio.NpzFile:
         """
         # Description
             -> This method aims to evaluate the performance of the model after training.
@@ -386,38 +386,41 @@ class LunarLanderManager:
         stdEpisodeLengths = np.std(data["ep_lengths"], axis=1)
 
         # Plot Rewards with standard deviation
-        axs[0].plot(data["timesteps"], meanRewards, label="Reward")
+        axs[0].plot(data["timesteps"], meanRewards, label="Reward", color="#29599c")
         axs[0].fill_between(
             data["timesteps"],
             meanRewards - stdRewards,
             meanRewards + stdRewards,
-            color="blue",
-            alpha=0.2,
+            color="#a7c1cc",
+            alpha=0.5,
             label="Std Dev",
         )
         axs[0].set_title("Reward")
         axs[0].set_xlabel("TimeSteps")
         axs[0].set_ylabel("Reward")
         axs[0].legend()
-        axs[0].grid(True)
+        axs[0].grid(alpha=0.4, linestyle="dashed")
 
         # Plot Episode Lengths with standard deviation
         axs[1].plot(
-            data["timesteps"], meanEpisodeLengths, label="Episode Lengths", color="red"
+            data["timesteps"],
+            meanEpisodeLengths,
+            label="Episode Lengths",
+            color="#960018",
         )
         axs[1].fill_between(
             data["timesteps"],
             meanEpisodeLengths - stdEpisodeLengths,
             meanEpisodeLengths + stdEpisodeLengths,
-            color="red",
-            alpha=0.2,
+            color="#ff3932",
+            alpha=0.5,
             label="Std Dev",
         )
         axs[1].set_title("Episode Lengths")
         axs[1].set_xlabel("TimeSteps")
         axs[1].set_ylabel("Episode Lengths")
         axs[1].legend()
-        axs[1].grid(True)
+        axs[1].grid(alpha=0.4, linestyle="dashed")
 
         fig.suptitle(
             f"[{self._envVersion}] {self.algorithm} Performance Evaluation", fontsize=16
@@ -428,3 +431,6 @@ class LunarLanderManager:
 
         # Show the plot
         plt.show()
+
+        # Return the Results
+        return data
