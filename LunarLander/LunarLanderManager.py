@@ -309,7 +309,7 @@ class LunarLanderManager:
             trunc = False
             while not trunc:
                 # pass observation to model to get predicted action
-                action, _states = model.predict(obs)
+                action, _states = model.predict(obs, deterministic=True)
 
                 # pass action to env and get info back
                 obs, rewards, trunc, done, info = env.step(action)
@@ -354,7 +354,7 @@ class LunarLanderManager:
 
         # Close the Environment
         env.close()
-    
+
     def checkResults(self) -> None:
         """
         # Description
@@ -378,22 +378,22 @@ class LunarLanderManager:
         data = np.load(resultsPath)
 
         # Extract mean and standard deviation for rewards
-        meanRewards = np.mean(data['results'], axis=1)
-        stdRewards = np.std(data['results'], axis=1)
+        meanRewards = np.mean(data["results"], axis=1)
+        stdRewards = np.std(data["results"], axis=1)
 
         # Extract mean and standard deviation for episode lengths
-        meanEpisodeLengths = np.mean(data['ep_lengths'], axis=1)
-        stdEpisodeLengths = np.std(data['ep_lengths'], axis=1)
+        meanEpisodeLengths = np.mean(data["ep_lengths"], axis=1)
+        stdEpisodeLengths = np.std(data["ep_lengths"], axis=1)
 
         # Plot Rewards with standard deviation
-        axs[0].plot(data['timesteps'], meanRewards, label="Reward")
+        axs[0].plot(data["timesteps"], meanRewards, label="Reward")
         axs[0].fill_between(
-            data['timesteps'],
+            data["timesteps"],
             meanRewards - stdRewards,
             meanRewards + stdRewards,
-            color='blue',
+            color="blue",
             alpha=0.2,
-            label="Std Dev"
+            label="Std Dev",
         )
         axs[0].set_title("Reward")
         axs[0].set_xlabel("TimeSteps")
@@ -402,14 +402,16 @@ class LunarLanderManager:
         axs[0].grid(True)
 
         # Plot Episode Lengths with standard deviation
-        axs[1].plot(data['timesteps'], meanEpisodeLengths, label="Episode Lengths", color="red")
+        axs[1].plot(
+            data["timesteps"], meanEpisodeLengths, label="Episode Lengths", color="red"
+        )
         axs[1].fill_between(
-            data['timesteps'],
+            data["timesteps"],
             meanEpisodeLengths - stdEpisodeLengths,
             meanEpisodeLengths + stdEpisodeLengths,
-            color='red',
+            color="red",
             alpha=0.2,
-            label="Std Dev"
+            label="Std Dev",
         )
         axs[1].set_title("Episode Lengths")
         axs[1].set_xlabel("TimeSteps")
@@ -417,7 +419,9 @@ class LunarLanderManager:
         axs[1].legend()
         axs[1].grid(True)
 
-        fig.suptitle(f"[{self._envVersion}] {self.algorithm} Performance Evaluation", fontsize=16)
+        fig.suptitle(
+            f"[{self._envVersion}] {self.algorithm} Performance Evaluation", fontsize=16
+        )
 
         # Adjust layout to prevent overlapping
         plt.tight_layout()
