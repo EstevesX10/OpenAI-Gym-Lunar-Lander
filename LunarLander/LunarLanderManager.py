@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import gymnasium as gym
+from gymnasium.wrappers import RecordVideo
 
 from stable_baselines3 import PPO, DQN
 from stable_baselines3.common.env_util import make_vec_env
@@ -285,6 +286,67 @@ class LunarLanderManager:
 
         # Define a Environment
         env = gym.make(self.envName, render_mode="human")
+
+        # Check if a model was given
+        if model is None:
+            # Define Model Path
+            bestModelPath = f"./ExperimentalResults/{self._envVersion}/{self.algorithm}/Settings-{self.settingsNumber}/bestModel/best_model.zip"
+
+            # PPO Algorithm
+            if self.algorithm == "PPO":
+                model = PPO.load(path=bestModelPath, env=env)
+            # DQN Algorithm
+            elif self.algorithm == "DQN":
+                model = DQN.load(path=bestModelPath, env=env)
+            else:
+                # Close the Environment
+                env.close()
+                # Raise Error
+                raise ValueError("Unsupported Algorithm Chosen!")
+
+        # Perform N Episodes
+        for ep in range(numEpisodes):
+            obs, info = env.reset()
+            trunc = False
+            while not trunc:
+                # pass observation to model to get predicted action
+                action, _states = model.predict(obs, deterministic=True)
+
+                # pass action to env and get info back
+                obs, rewards, trunc, done, info = env.step(action)
+
+                # show the environment on the screen
+                env.render()
+                # print(ep, rewards, trunc)
+                # print("---------------")
+
+        # Close the Environment
+        env.close()
+
+    def recordVideo(
+        self, model: Union[PPO, DQN] = None, numEpisodes: int = CONFIG["N_EPISODES"]
+    ) -> None:
+        """
+        # Description
+            -> This method allows to test a given model upon the selected Environment.
+        ------------------------------------------------------------------------------
+        := param: model - Trained Model.
+        := param: numEpisodes - Number of Episodes to Consider.
+        := return: None, since we are simply testing the model.
+        """
+
+        # Define a Environment
+        env = gym.make(self.envName, render_mode="rgb_array")
+
+        # Video recorder wrapper
+        trigger = lambda t: t == 0
+        env = RecordVideo(
+            env,
+            video_folder=f"./ExperimentalResults/{self._envVersion}/{self.algorithm}/Settings-{self.settingsNumber}/recordings/",
+            episode_trigger=trigger,
+            video_length=999_999_999,
+            disable_logger=True,
+        )
 
         # Check if a model was given
         if model is None:
