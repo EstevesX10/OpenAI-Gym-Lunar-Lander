@@ -328,10 +328,10 @@ class LunarLanderManager:
     ) -> None:
         """
         # Description
-            -> This method allows to test a given model upon the selected Environment.
+            -> This method allows to record a given model upon the selected Environment.
         ------------------------------------------------------------------------------
         := param: model - Trained Model.
-        := param: numEpisodes - Number of Episodes to Consider.
+        := param: numEpisodes - Number of Episodes to record.
         := return: None, since we are simply testing the model.
         """
 
@@ -434,7 +434,7 @@ class LunarLanderManager:
             raise ValueError("The Results have not yet been Computed!")
 
         # Creating the figure and subplots
-        fig, axs = plt.subplots(1, 2, figsize=(12, 4))  # 3 rows, 1 column
+        fig, axs = plt.subplots(1, 3, figsize=(17, 4))  # 3 rows, 1 column
 
         # Load the collected data
         data = np.load(resultsPath)
@@ -460,6 +460,7 @@ class LunarLanderManager:
         axs[0].set_title("Reward")
         axs[0].set_xlabel("TimeSteps")
         axs[0].set_ylabel("Reward")
+        # axs[0].set_ylim(-500, 500)
         axs[0].legend()
         axs[0].grid(alpha=0.4, linestyle="dashed")
 
@@ -484,6 +485,16 @@ class LunarLanderManager:
         axs[1].legend()
         axs[1].grid(alpha=0.4, linestyle="dashed")
 
+        # Plot success rate
+        successRate = (data["results"] > CONFIG["SUCCESS_THRESHOLD"]).sum(
+            axis=1
+        ) / data["results"].shape[1]
+        axs[2].plot(successRate, label="Success Rate", color="#4cb07a")
+        axs[2].set_title("Success Rate")
+        axs[2].set_xlabel("EvaluationSteps")
+        axs[2].set_ylabel("Success Rate")
+        axs[2].grid(alpha=0.4, linestyle="dashed")
+
         fig.suptitle(
             f"[{self._envVersion}] {self.algorithm} Performance Evaluation", fontsize=16
         )
@@ -496,3 +507,54 @@ class LunarLanderManager:
 
         # Return the Results
         return data
+
+    def calculateSuccessRate(
+        self, model: Union[PPO, DQN] = None, numEpisodes: int = 100
+    ) -> None:
+        """
+        # Description
+            -> This method allows to test a given model upon the selected Environment.
+        ------------------------------------------------------------------------------
+        := param: model - Trained Model.
+        := param: numEpisodes - Number of Episodes to Consider.
+        := return: None, since we are simply testing the model.
+        """
+
+        # Define a Environment
+        env = gym.make(self.envName, render_mode="human")
+
+        # Check if a model was given
+        if model is None:
+            # Define Model Path
+            bestModelPath = f"./ExperimentalResults/{self._envVersion}/{self.algorithm}/Settings-{self.settingsNumber}/bestModel/best_model.zip"
+
+            # PPO Algorithm
+            if self.algorithm == "PPO":
+                model = PPO.load(path=bestModelPath, env=env)
+            # DQN Algorithm
+            elif self.algorithm == "DQN":
+                model = DQN.load(path=bestModelPath, env=env)
+            else:
+                # Close the Environment
+                env.close()
+                # Raise Error
+                raise ValueError("Unsupported Algorithm Chosen!")
+
+        # Perform N Episodes
+        for ep in range(numEpisodes):
+            obs, info = env.reset()
+            trunc = False
+            while not trunc:
+                # pass observation to model to get predicted action
+                action, _states = model.predict(obs, deterministic=True)
+
+                # pass action to env and get info back
+                obs, rewards, trunc, done, info = env.step(action)
+
+                # show the environment on the screen
+                env.render()
+                # print(ep, rewards, trunc)
+                # print("---------------")
+
+        # Close the Environment
+        env.close()

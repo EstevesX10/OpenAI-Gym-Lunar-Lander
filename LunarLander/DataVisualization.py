@@ -3,6 +3,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from Configuration import CONFIG
+from gymnasium.wrappers import RecordEpisodeStatistics
+from collections import defaultdict
+import gymnasium as gym
 
 def pastelizeColor(c:tuple, weight:float=None) -> np.ndarray:
     """
@@ -64,7 +68,7 @@ def plotModelsTrainingPerformance(results:Tuple[str, str, str, List[np.lib.npyio
         raise ValueError("Not enough colors! Please adapt the implementation")
 
     # Creating the figure and subplots
-    fig, axs = plt.subplots(1, 2, figsize=(12, 4))
+    fig, axs = plt.subplots(1, 3, figsize=(17, 4))
 
     # Iterate through the results
     for idx, (algorithm, _, _, data) in enumerate(results):
@@ -96,6 +100,17 @@ def plotModelsTrainingPerformance(results:Tuple[str, str, str, List[np.lib.npyio
         axs[1].legend()
         axs[1].grid(alpha=0.4, linestyle='dashed')
 
+        # Plot success rate
+        successRate = (data["results"] > CONFIG["SUCCESS_THRESHOLD"]).sum(
+            axis=1
+        ) / data["results"].shape[1]
+        axs[2].plot(successRate, label=f"{algorithm}", alpha=0.7, color=customColorMap[idx])
+        axs[2].set_title("Success Rate")
+        axs[2].set_xlabel("EvaluationSteps")
+        axs[2].set_ylabel("Success Rate")
+        axs[2].legend()
+        axs[2].grid(alpha=0.4, linestyle="dashed")
+
     # Add a main title to the plot
     fig.suptitle(f"[{results[0][1]} Environment] Performance Evaluation", fontsize=16)
 
@@ -125,7 +140,7 @@ def plotModelSettingsPerformance(results:Tuple[str, str, str, List[np.lib.npyio.
         raise ValueError("Not enough colors! Please adapt the implementation")
 
     # Creating the figure and subplots
-    fig, axs = plt.subplots(1, 2, figsize=(12, 4))
+    fig, axs = plt.subplots(1, 3, figsize=(17, 4))
 
     # Iterate through the results
     for idx, (_, _, setting, data) in enumerate(results):
@@ -152,6 +167,17 @@ def plotModelSettingsPerformance(results:Tuple[str, str, str, List[np.lib.npyio.
         axs[1].set_ylabel("Episode Lengths")
         axs[1].legend()
         axs[1].grid(alpha=0.4, linestyle='dashed')
+
+        # Plot success rate
+        successRate = (data["results"] > CONFIG["SUCCESS_THRESHOLD"]).sum(
+            axis=1
+        ) / data["results"].shape[1]
+        axs[2].plot(successRate, label=f"{setting}", alpha=0.7, color=customColorMap[idx])
+        axs[2].set_title("Success Rate")
+        axs[2].set_xlabel("EvaluationSteps")
+        axs[2].set_ylabel("Success Rate")
+        axs[2].legend()
+        axs[2].grid(alpha=0.4, linestyle="dashed")
 
     # Add a main title to the plot
     fig.suptitle(f"[{results[0][1]} Environment] {results[0][0]} Settings Performance Evaluation", fontsize=16)
@@ -187,7 +213,7 @@ def plotModelsOverallPerformances(originalEnvResults:Tuple[str, str, List[np.lib
         raise ValueError("Not enough colors! Please adapt the implementation")
 
     # Creating the figure and subplots
-    fig, axs = plt.subplots(2, 2, figsize=(14, 8))
+    fig, axs = plt.subplots(2, 3, figsize=(17, 8))
 
     # Then manually add more space at the top and between rows
     fig.subplots_adjust(top=0.18, hspace=0.4)
@@ -223,6 +249,17 @@ def plotModelsOverallPerformances(originalEnvResults:Tuple[str, str, List[np.lib
         axs[0, 1].legend()
         axs[0, 1].grid(alpha=0.4, linestyle='dashed')
 
+        # Plot success rate
+        successRate = (data["results"] > CONFIG["SUCCESS_THRESHOLD"]).sum(
+            axis=1
+        ) / data["results"].shape[1]
+        axs[0, 2].plot(successRate, label=f"[{model}] {setting}", alpha=0.7, color=customColorMap[idx])
+        axs[0, 2].set_title("Success Rate")
+        axs[0, 2].set_xlabel("EvaluationSteps")
+        axs[0, 2].set_ylabel("Success Rate")
+        axs[0, 2].legend()
+        axs[0, 2].grid(alpha=0.4, linestyle="dashed")
+
     # Iterate through the custom environment results
     for idx, (model, setting, data) in enumerate(customEnvResults):
 
@@ -249,8 +286,56 @@ def plotModelsOverallPerformances(originalEnvResults:Tuple[str, str, List[np.lib
         axs[1, 1].legend()
         axs[1, 1].grid(alpha=0.4, linestyle='dashed')
 
+        # Plot success rate
+        successRate = (data["results"] > CONFIG["SUCCESS_THRESHOLD"]).sum(
+            axis=1
+        ) / data["results"].shape[1]
+        axs[1, 2].plot(successRate, label=f"[{model}] {setting}", alpha=0.7, color=customColorMap[idx])
+        axs[1, 2].set_title("Success Rate")
+        axs[1, 2].set_xlabel("EvaluationSteps")
+        axs[1, 2].set_ylabel("Success Rate")
+        axs[1, 2].legend()
+        axs[1, 2].grid(alpha=0.4, linestyle="dashed")
+
     # Adjust layout to prevent overlapping
     plt.tight_layout()
 
     # Show the plot
     plt.show()
+
+def successRates(envName: str):
+
+    # Define a Environment
+    env = gym.make("LunarLander-v3") #, render_mode="human")
+    env = RecordEpisodeStatistics(env)
+
+    results = defaultdict(list)
+
+    # Perform N Episodes
+    for ep in range(10):
+        obs, info = env.reset()
+        trunc = False
+        while not trunc:
+            # pass observation to model to get predicted action
+            # action, _states = model.predict(obs, deterministic=True)
+            action = (
+                env.action_space.sample()
+            )  # agent policy that uses the observation and info
+
+
+            # pass action to env and get info back
+            obs, rewards, trunc, done, info = env.step(action)
+
+            # show the environment on the screen
+            env.render()
+            print(ep, rewards, trunc, info)
+            print("---------------")
+
+            if "episode" in info:
+                results["rewards"].append(info["episode"]["r"])
+                results["length"].append(info["episode"]["l"])
+                results["time"].append(info["episode"]["t"])
+
+
+    # Close the Environment
+    env.close()
