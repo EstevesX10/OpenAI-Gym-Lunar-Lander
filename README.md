@@ -34,17 +34,54 @@
 
 ## Project Overview
 
-### Problem Scenario
+This project explores the impact of customizing an `OpenAI Gym Environment` on **reinforcement learning (RL) performance**. We modified an existing Gym environment - Lunar Lander - in order to train an RL agent using the Stable Baselines library, and later compare results between the **customized and original environments**.
 
-> ADD PROBLEM SCENARIO
+The process involves:
 
-### Objective
+- **Environment Customization**: **Implement changes** such as altered rewards or added challenges to the Environment.
+- **Agent Training**: Train an RL agent with **algorithms like PPO** and further **tune their hyperparameters** to ensure optimal performance.
+- **Evaluation**: **Compare agent performance** in both environments to analyze the effect of the customizations.
 
-> ADD OBJECTIVE
+This project aims to analyse **how does the environment design influence the outcomes of a Reinforcement Learning Algorithm**.
 
 ## Project Results
 
 > ADD PROJECT RESULTS
+
+<table width="100%">
+    <thead>
+        <th></th>
+        <th>
+            <div align="center">
+                Original Environment
+            </div>
+        </th>
+        <th>
+            <div align="center">
+                Custom Environment
+            </div>
+        </th>
+    </thead>
+    <tbody>
+        <tr>
+            <td width="10%">
+                <p align="center" width="100%">
+                    [PPO] Settings-1
+                </p>
+            </td>
+            <td width="45%">
+                <video width="100%" height="100%" controls>
+                    <source src="./LunarLander/ExperimentalResults/OriginalEnvironment/PPO/Settings-1/recordings/rl-video-episode-0.mp4" type="video/mp4">
+                </video>
+            </td>
+            <td width="45%">
+                <video width="100%" height="100%" controls>
+                    <source src="./LunarLander/ExperimentalResults/CustomEnvironment/PPO/Settings-1/recordings/rl-video-episode-0.mp4" type="video/mp4">
+                </video>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 ## Authorship
 
