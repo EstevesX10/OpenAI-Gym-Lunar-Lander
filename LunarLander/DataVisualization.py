@@ -1,12 +1,10 @@
-from typing import (List, Tuple)
+from typing import (List, Tuple, Dict)
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from Configuration import CONFIG
-from gymnasium.wrappers import RecordEpisodeStatistics
-from collections import defaultdict
-import gymnasium as gym
+
 
 def pastelizeColor(c:tuple, weight:float=None) -> np.ndarray:
     """
@@ -303,39 +301,64 @@ def plotModelsOverallPerformances(originalEnvResults:Tuple[str, str, List[np.lib
     # Show the plot
     plt.show()
 
-def successRates(envName: str):
+def plotStuff(evals: Dict[str, Dict[str, List[float]]]):
+    
+    for i, (algorithm, results) in enumerate(evals.items()):
+        plt.subplot(1, 3, i, figSize=(17, 8))
 
-    # Define a Environment
-    env = gym.make("LunarLander-v3") #, render_mode="human")
-    env = RecordEpisodeStatistics(env)
+        successRate = (np.array(results["rewards"]) > CONFIG["SUCCESS_THRESHOLD"]).sum() / len(results["rewards"])
+        plt.bar()
+        
 
-    results = defaultdict(list)
+def plotOverallEvaluationResults(originalEnvResults: Tuple[str, str, Dict[str, List[float]]], customEnvResults: Tuple[str, str, Dict[str, List[float]]]) -> None:
+    # Create a Custom Color Map
+    customColorMap = ['#29599c', '#f66b6e', '#4cb07a', '#f8946c']
 
-    # Perform N Episodes
-    for ep in range(10):
-        obs, info = env.reset()
-        trunc = False
-        while not trunc:
-            # pass observation to model to get predicted action
-            # action, _states = model.predict(obs, deterministic=True)
-            action = (
-                env.action_space.sample()
-            )  # agent policy that uses the observation and info
+    # Creating the figure and subplots
+    fig, axs = plt.subplots(2, 3, figsize=(17, 8))
 
+    # Then manually add more space at the top and between rows
+    fig.subplots_adjust(top=0.18, hspace=0.4)
 
-            # pass action to env and get info back
-            obs, rewards, trunc, done, info = env.step(action)
+    # Add a title for the top row (Original Environment)
+    fig.text(0.5, 0.98, "[Original Environment]", ha='center', va='center', fontsize=14, fontweight='bold')
 
-            # show the environment on the screen
-            env.render()
-            print(ep, rewards, trunc, info)
-            print("---------------")
+    # Add a title for the bottom row (Custom Environment)
+    fig.text(0.5, 0.48, "[Custom Environment]", ha='center', va='center', fontsize=14, fontweight='bold')
 
-            if "episode" in info:
-                results["rewards"].append(info["episode"]["r"])
-                results["length"].append(info["episode"]["l"])
-                results["time"].append(info["episode"]["t"])
+    def plot_error_charts(results, row):
+        labels = [f"{model}\n{setting}" for model, setting, _ in results]
 
+        # Rewards
+        mean_rewards = [np.mean(data['rewards']) for _, _, data in results]
+        std_rewards = [np.std(data['rewards']) for _, _, data in results]
+        axs[row, 0].bar(labels, mean_rewards, yerr=std_rewards, align='center', ecolor='black', capsize=10, color=customColorMap[:len(results)])
+        axs[row, 0].set_title("Average Reward")
+        axs[row, 0].set_ylabel("Reward")
 
-    # Close the Environment
-    env.close()
+        # Episode Lengths
+        mean_lengths = [np.mean(data['length']) for _, _, data in results]
+        std_lengths = [np.std(data['length']) for _, _, data in results]
+        axs[row, 1].bar(labels, mean_lengths, yerr=std_lengths, align='center', ecolor='black', capsize=10, color=customColorMap[:len(results)])
+        axs[row, 1].set_title("Average Episode Length")
+        axs[row, 1].set_ylabel("Episode Length")
+
+        # Success Rates
+        success_rates = [(np.array(data['rewards']) > CONFIG["SUCCESS_THRESHOLD"]).mean() for _, _, data in results]
+        success_rates_std = [np.std((np.array(data['rewards']) > CONFIG["SUCCESS_THRESHOLD"]).astype(float)) for _, _, data in results]
+        axs[row, 2].bar(labels, success_rates, yerr=success_rates_std, align='center', ecolor='black', capsize=10, color=customColorMap[:len(results)])
+        axs[row, 2].set_title("Success Rate")
+        axs[row, 2].set_ylabel("Success Rate")
+
+    # Plot for original environment
+    plot_error_charts(originalEnvResults, 0)
+
+    # Plot for custom environment
+    plot_error_charts(customEnvResults, 1)
+
+    # Adjust layout to prevent overlapping
+    plt.tight_layout()
+
+    # Show the plot
+    plt.show()
+    

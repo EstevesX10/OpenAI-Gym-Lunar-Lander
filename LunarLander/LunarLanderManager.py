@@ -1,10 +1,11 @@
-from typing import Tuple, Union, Callable
+from typing import Tuple, Union, Dict, List
 import os
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import gymnasium as gym
-from gymnasium.wrappers import RecordVideo
+from gymnasium.wrappers import RecordVideo, RecordEpisodeStatistics
+from collections import defaultdict
 
 from stable_baselines3 import PPO, DQN
 from stable_baselines3.common.env_util import make_vec_env
@@ -508,20 +509,23 @@ class LunarLanderManager:
         # Return the Results
         return data
 
-    def calculateSuccessRate(
+    def evaluateModel(
         self, model: Union[PPO, DQN] = None, numEpisodes: int = 100
-    ) -> None:
+    ) -> Dict[str, List[float]]:
         """
         # Description
-            -> This method allows to test a given model upon the selected Environment.
+            -> This method allows to evaluate a given model upon the selected Environment.
         ------------------------------------------------------------------------------
         := param: model - Trained Model.
         := param: numEpisodes - Number of Episodes to Consider.
-        := return: None, since we are simply testing the model.
+        := return: Dictionary of collected metrics.
         """
 
         # Define a Environment
-        env = gym.make(self.envName, render_mode="human")
+        env = gym.make(self.envName)
+        env = RecordEpisodeStatistics(env)
+
+        results = defaultdict(list)
 
         # Check if a model was given
         if model is None:
@@ -551,10 +555,12 @@ class LunarLanderManager:
                 # pass action to env and get info back
                 obs, rewards, trunc, done, info = env.step(action)
 
-                # show the environment on the screen
-                env.render()
-                # print(ep, rewards, trunc)
-                # print("---------------")
+                if "episode" in info:
+                    results["rewards"].append(info["episode"]["r"])
+                    results["length"].append(info["episode"]["l"])
+                    results["time"].append(info["episode"]["t"])
 
         # Close the Environment
         env.close()
+
+        return results
