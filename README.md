@@ -66,7 +66,7 @@ This project aims to analyse **how does the environment design influence the out
         <tr>
             <td width="10%">
                 <p align="center" width="100%">
-                    [PPO] Settings-1
+                    [PPO] Settings1
                 </p>
             </td>
             <td width="45%">
