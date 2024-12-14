@@ -318,10 +318,10 @@ def plotOverallEvaluationResults(originalEnvResults: Tuple[str, str, Dict[str, L
     fig, axs = plt.subplots(2, 3, figsize=(17, 8))
 
     # Then manually add more space at the top and between rows
-    fig.subplots_adjust(top=0.18, hspace=0.4)
+    fig.subplots_adjust(top=0.9, hspace=0.4)
 
     # Add a title for the top row (Original Environment)
-    fig.text(0.5, 0.98, "[Original Environment]", ha='center', va='center', fontsize=14, fontweight='bold')
+    fig.text(0.5, 0.94, "[Original Environment]", ha='center', va='center', fontsize=14, fontweight='bold')
 
     # Add a title for the bottom row (Custom Environment)
     fig.text(0.5, 0.48, "[Custom Environment]", ha='center', va='center', fontsize=14, fontweight='bold')
@@ -357,7 +357,7 @@ def plotOverallEvaluationResults(originalEnvResults: Tuple[str, str, Dict[str, L
     plot_error_charts(customEnvResults, 1)
 
     # Adjust layout to prevent overlapping
-    plt.tight_layout()
+    # plt.tight_layout()
 
     # Show the plot
     plt.show()
