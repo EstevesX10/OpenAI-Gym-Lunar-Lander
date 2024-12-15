@@ -1,5 +1,11 @@
 <div align="center">
-    <h1>Lunar Lander</h1>
+    <h1></h1>
+</div>
+
+<div align="center">
+
+# OpenAI Gym | Lunar Lander
+
 </div>
 
 <p align="center" width="100%">
@@ -8,27 +14,27 @@
 
 <div align="center">
     <a>
-        <img src="https://img.shields.io/badge/Made%20with-Python-6A9C89?style=for-the-badge&logo=Python&logoColor=6A9C89">
+        <img src="https://img.shields.io/badge/Made%20with-Python-bedcf5?style=for-the-badge&logo=Python&logoColor=bedcf5">
     </a>
     <a>
-        <img src="https://img.shields.io/badge/Made%20with-SPADE-6A9C89?style=for-the-badge&logo=robotframework&logoColor=6A9C89">
+        <img src="https://img.shields.io/badge/Made%20with-SPADE-bedcf5?style=for-the-badge&logo=robotframework&logoColor=bedcf5">
     </a>
 </div>
 
 <br/>
 
 <div align="center">
-    <a href="https://github.com/EstevesX10/_INSERT_REPO_NAME_/blob/main/LICENSE">
-        <img src="https://img.shields.io/github/license/EstevesX10/_INSERT_REPO_NAME_?style=flat&logo=gitbook&logoColor=6A9C89&label=License&color=6A9C89">
+    <a href="https://github.com/EstevesX10/OpenAI-Gym-Lunar-Lander/blob/main/LICENSE">
+        <img src="https://img.shields.io/github/license/EstevesX10/OpenAI-Gym-Lunar-Lander?style=flat&logo=gitbook&logoColor=bedcf5&label=License&color=bedcf5">
     </a>
     <a href="#">
-        <img src="https://img.shields.io/github/repo-size/EstevesX10/_INSERT_REPO_NAME_?style=flat&logo=googlecloudstorage&logoColor=6A9C89&logoSize=auto&label=Repository%20Size&color=6A9C89">
+        <img src="https://img.shields.io/github/repo-size/EstevesX10/OpenAI-Gym-Lunar-Lander?style=flat&logo=googlecloudstorage&logoColor=bedcf5&logoSize=auto&label=Repository%20Size&color=bedcf5">
     </a>
     <a href="#">
-        <img src="https://img.shields.io/github/stars/EstevesX10/_INSERT_REPO_NAME_?style=flat&logo=adafruit&logoColor=6A9C89&logoSize=auto&label=Stars&color=6A9C89">
+        <img src="https://img.shields.io/github/stars/EstevesX10/OpenAI-Gym-Lunar-Lander?style=flat&logo=adafruit&logoColor=bedcf5&logoSize=auto&label=Stars&color=bedcf5">
     </a>
-    <a href="https://github.com/EstevesX10/_INSERT_REPO_NAME_/blob/main/SETUP.md">
-        <img src="https://img.shields.io/badge/Setup-SETUP.md-white?style=flat&logo=springboot&logoColor=6A9C89&logoSize=auto&color=6A9C89"> 
+    <a href="https://github.com/EstevesX10/OpenAI-Gym-Lunar-Lander/blob/main/SETUP.md">
+        <img src="https://img.shields.io/badge/Setup-SETUP.md-white?style=flat&logo=springboot&logoColor=bedcf5&logoSize=auto&color=bedcf5"> 
     </a>
 </div>
 
@@ -77,6 +83,59 @@ This project aims to analyse **how does the environment design influence the out
             <td width="45%">
                 <p align="center" width="100%">
                     <img src="./LunarLander/ExperimentalResults/CustomEnvironment/PPO/Settings-1/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td width="10%">
+                <p align="center" width="100%">
+                    [PPO] Settings2
+                </p>
+            </td>
+            <td width="45%">
+                <p align="center" width="100%">
+                    [NOT DONE]
+                    <!-- <img src="./LunarLander/ExperimentalResults/OriginalEnvironment/PPO/Settings-2/recordings/rl-video-episode-0.gif" width="100%" height="100%" /> -->
+                </p>
+            </td>
+            <td width="45%">
+                <p align="center" width="100%">
+                    <img src="./LunarLander/ExperimentalResults/CustomEnvironment/PPO/Settings-2/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td width="10%">
+                <p align="center" width="100%">
+                    [DQN] Settings1
+                </p>
+            </td>
+            <td width="45%">
+                <p align="center" width="100%">
+                    <img src="./LunarLander/ExperimentalResults/OriginalEnvironment/DQN/Settings-1/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
+                </p>
+            </td>
+            <td width="45%">
+                <p align="center" width="100%">
+                    <img src="./LunarLander/ExperimentalResults/CustomEnvironment/DQN/Settings-1/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td width="10%">
+                <p align="center" width="100%">
+                    [DQN] Settings2
+                </p>
+            </td>
+            <td width="45%">
+                <p align="center" width="100%">
+                    [NOT DONE]
+                    <!-- <img src="./LunarLander/ExperimentalResults/OriginalEnvironment/DQN/Settings-2/recordings/rl-video-episode-0.gif" width="100%" height="100%" /> -->
+                </p>
+            </td>
+            <td width="45%">
+                <p align="center" width="100%">
+                    <img src="./LunarLander/ExperimentalResults/CustomEnvironment/DQN/Settings-2/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
                 </p>
             </td>
         </tr>
