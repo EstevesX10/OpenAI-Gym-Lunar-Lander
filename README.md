@@ -70,14 +70,14 @@ This project aims to analyse **how does the environment design influence the out
                 </p>
             </td>
             <td width="45%">
-                <video width="100%" height="100%" controls>
-                    <source src="./LunarLander/ExperimentalResults/OriginalEnvironment/PPO/Settings-1/recordings/rl-video-episode-0.mp4" type="video/mp4">
-                </video>
+                <p align="center" width="100%">
+                    <img src="./LunarLander/ExperimentalResults/OriginalEnvironment/PPO/Settings-1/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
+                </p>
             </td>
             <td width="45%">
-                <video width="100%" height="100%" controls>
-                    <source src="./LunarLander/ExperimentalResults/CustomEnvironment/PPO/Settings-1/recordings/rl-video-episode-0.mp4" type="video/mp4">
-                </video>
+                <p align="center" width="100%">
+                    <img src="./LunarLander/ExperimentalResults/CustomEnvironment/PPO/Settings-1/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
+                </p>
             </td>
         </tr>
     </tbody>
