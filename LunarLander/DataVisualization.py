@@ -301,15 +301,6 @@ def plotModelsOverallPerformances(originalEnvResults:Tuple[str, str, List[np.lib
     # Show the plot
     plt.show()
 
-def plotStuff(evals: Dict[str, Dict[str, List[float]]]):
-    
-    for i, (algorithm, results) in enumerate(evals.items()):
-        plt.subplot(1, 3, i, figSize=(17, 8))
-
-        successRate = (np.array(results["rewards"]) > CONFIG["SUCCESS_THRESHOLD"]).sum() / len(results["rewards"])
-        plt.bar()
-        
-
 def plotOverallEvaluationResults(originalEnvResults: Tuple[str, str, Dict[str, List[float]]], customEnvResults: Tuple[str, str, Dict[str, List[float]]]) -> None:
     # Create a Custom Color Map
     customColorMap = ['#29599c', '#f66b6e', '#4cb07a', '#f8946c']
@@ -361,4 +352,143 @@ def plotOverallEvaluationResults(originalEnvResults: Tuple[str, str, Dict[str, L
 
     # Show the plot
     plt.show()
+
+def plotOverallEvaluationResultsViolinplots(originalEnvResults: Tuple[str, str, Dict[str, List[float]]], customEnvResults: Tuple[str, str, Dict[str, List[float]]]) -> None:
+    # Create a Custom Color Map
+    customColorMap = ['#29599c', '#f66b6e', '#4cb07a', '#f8946c']
+
+    # Creating the figure and subplots
+    fig, axs = plt.subplots(2, 3, figsize=(17, 10))
+
+    # Then manually add more space at the top and between rows
+    fig.subplots_adjust(top=0.9, hspace=0.4)
+
+    # Add a title for the top row (Original Environment)
+    fig.text(0.5, 0.94, "[Original Environment]", ha='center', va='center', fontsize=14, fontweight='bold')
+
+    # Add a title for the bottom row (Custom Environment)
+    fig.text(0.5, 0.48, "[Custom Environment]", ha='center', va='center', fontsize=14, fontweight='bold')
+
+    def plot_violinplots(results, row):
+        labels = [f"{model}\n{setting}" for model, setting, _ in results]
+
+        # Rewards
+        rewards_data = [data['rewards'] for _, _, data in results]
+        axs[row, 0].violinplot(rewards_data, showmeans=True, showextrema=True, showmedians=True)
+        axs[row, 0].set_title("Reward Distribution")
+        axs[row, 0].set_ylabel("Reward")
+        axs[row, 0].set_xticks(range(1, len(labels) + 1))
+        axs[row, 0].set_xticklabels(labels)
+
+        # Episode Lengths
+        lengths_data = [data['length'] for _, _, data in results]
+        axs[row, 1].violinplot(lengths_data, showmeans=True, showextrema=True, showmedians=True)
+        axs[row, 1].set_title("Episode Length Distribution")
+        axs[row, 1].set_ylabel("Episode Length")
+        axs[row, 1].set_xticks(range(1, len(labels) + 1))
+        axs[row, 1].set_xticklabels(labels)
+
+        # Success Rates
+        success_rates_data = [(np.array(data['rewards']) > CONFIG["SUCCESS_THRESHOLD"]).astype(float) for _, _, data in results]
+        axs[row, 2].violinplot(success_rates_data, showmeans=True, showextrema=True, showmedians=True)
+        axs[row, 2].set_title("Success Rate Distribution")
+        axs[row, 2].set_ylabel("Success Rate")
+        axs[row, 2].set_xticks(range(1, len(labels) + 1))
+        axs[row, 2].set_xticklabels(labels)
+
+        # Add color to violin plots
+        for i, pc in enumerate(axs[row, 0].collections):
+            pc.set_facecolor(customColorMap[i % len(customColorMap)])
+            pc.set_edgecolor('black')
+            pc.set_alpha(0.7)
+        for i, pc in enumerate(axs[row, 1].collections):
+            pc.set_facecolor(customColorMap[i % len(customColorMap)])
+            pc.set_edgecolor('black')
+            pc.set_alpha(0.7)
+        for i, pc in enumerate(axs[row, 2].collections):
+            pc.set_facecolor(customColorMap[i % len(customColorMap)])
+            pc.set_edgecolor('black')
+            pc.set_alpha(0.7)
+    # Plot for original environment
+    plot_violinplots(originalEnvResults, 0)
+
+    # Plot for custom environment
+    plot_violinplots(customEnvResults, 1)
+
+    # Show the plot
+    plt.show()
     
+
+import numpy as np
+import matplotlib.pyplot as plt
+import scikit_posthocs as sp
+from scipy import stats
+
+def plotCriticalDifferenceDiagram(originalEnvResults: Tuple[str, str, Dict[str, List[float]]], customEnvResults: Tuple[str, str, Dict[str, List[float]]]) -> None:
+    # Combine results from both environments
+    all_results = originalEnvResults + customEnvResults
+
+    # Extract names and rewards
+    names = [f"original_{model}_{setting}" for model, setting, _ in originalEnvResults]
+    names += [f"custom_{model}_{setting}" for model, setting, _ in customEnvResults]
+    rewards = [data['rewards'] for _, _, data in all_results]
+    print(np.array(rewards).shape)
+
+    rewards2 = (pd.DataFrame(np.array(rewards).T, columns=names))
+    print(rewards2)
+
+    # Perform Friedman test
+    # friedman_statistic, pvalue = stats.friedmanchisquare(*rewards)
+    friedman_statistic, pvalue = stats.friedmanchisquare(*[rewards2[alg] for alg in rewards2.columns])
+
+
+    # Calculate average ranks
+    # all_rewards = np.array(rewards).T  # Transpose to get rewards for each trial across all models
+    # ranks = np.array([stats.rankdata(-r) for r in all_rewards])  # Rank for each trial
+    # avg_ranks = np.mean(ranks, axis=0)  # Average rank for each model
+    # print(avg_ranks, names)
+
+    data = (
+        rewards2.rename_axis('cv_fold')
+          .melt(
+              var_name='estimator',
+              value_name='score',
+              ignore_index=False,
+          )
+          .reset_index()
+    )
+    avg_ranks = data.groupby('cv_fold').score.rank(pct=True).groupby(data.estimator).mean()
+    print(avg_ranks)
+
+    paired_comp = sp.posthoc_nemenyi_friedman(rewards2)
+    print(paired_comp)
+
+    # Create the critical difference diagram
+    fig, ax = plt.subplots(figsize=(10, 6))
+    # sp.critical_difference_diagram(pd.Series(avg_ranks, index=names), paired_comp, ax=ax)
+    sp.critical_difference_diagram(avg_ranks, paired_comp, ax=ax)
+
+    # ranks = rewards2.rank(axis=1, ascending=False).mean()
+    
+    # # Perform Nemenyi post-hoc test
+    # nemenyi = sp.posthoc_nemenyi_friedman(ranks)
+
+    # # Add Some Styling
+    # marker = {'marker':'o', 'linewidth':1}
+    # label_props = {'backgroundcolor':'#ADD5F7', 'verticalalignment':'top'}
+    
+    # # Plot the Critical Difference Diagram
+    # _ = sp.critical_difference_diagram(ranks, nemenyi, marker_props=marker, label_props=label_props)
+
+    # Add Friedman test results to the plot
+    plt.text(0.5, -0.1, f'Friedman test statistic: {friedman_statistic:.4f}\np-value: {pvalue:.4f}', 
+             horizontalalignment='center', verticalalignment='center', 
+             transform=ax.transAxes)
+
+    # Set the title
+    plt.title("Critical Difference Diagram of Rewards")
+
+    # Adjust layout and show the plot
+    plt.tight_layout()
+    plt.show()
+
