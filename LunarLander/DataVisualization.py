@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from Configuration import CONFIG
 
+import scikit_posthocs as sp
+from scipy import stats
+
 
 def pastelizeColor(c:tuple, weight:float=None) -> np.ndarray:
     """
@@ -199,10 +202,6 @@ def plotModelsOverallPerformances(originalEnvResults:Tuple[str, str, List[np.lib
     # Get the number of results
     numberResults = max(len(originalEnvResults), len(customEnvResults))
 
-    # Create a pastel cmap based on the amount of the results for both the rewards and the average episode length
-    # rewardsColorMap = generatePastelCmap(baseColors=[plt.cm.Paired(5//(i + 1)) for i in range(numberResults)], numberColors=numberResults, weight=0)
-    # episodeLengthColorMap = generatePastelCmap(baseColors=[plt.cm.Accent(5//(i + 1)) for i in range(numberResults)], numberColors=numberResults, weight=0)
-
     # Create a Custom Color Map
     customColorMap = ['#29599c', '#f66b6e', '#4cb07a', '#f8946c']
 
@@ -302,6 +301,15 @@ def plotModelsOverallPerformances(originalEnvResults:Tuple[str, str, List[np.lib
     plt.show()
 
 def plotOverallEvaluationResults(originalEnvResults: Tuple[str, str, Dict[str, List[float]]], customEnvResults: Tuple[str, str, Dict[str, List[float]]]) -> None:
+    """
+    # Description
+        -> This function aims to plot the evaluation results of the used algorithms under the respective settings and environments.
+    -------------------------------------------------------------------------------------------------------------------------------
+    := param: originalEnvResults - Tuple composed by the algorithm and setting alongside the List with all the evallogs obtained for the trained models for the original Environment.
+    := param: customEnvResults - Tuple composed by the algorithm and setting alongside the List with all the evallogs obtained for the trained models for the custom Environment.
+    := return: None, since we are only plotting results.
+    """
+    
     # Create a Custom Color Map
     customColorMap = ['#29599c', '#f66b6e', '#4cb07a', '#f8946c']
 
@@ -347,13 +355,19 @@ def plotOverallEvaluationResults(originalEnvResults: Tuple[str, str, Dict[str, L
     # Plot for custom environment
     plot_error_charts(customEnvResults, 1)
 
-    # Adjust layout to prevent overlapping
-    # plt.tight_layout()
-
     # Show the plot
     plt.show()
 
 def plotOverallEvaluationResultsViolinplots(originalEnvResults: Tuple[str, str, Dict[str, List[float]]], customEnvResults: Tuple[str, str, Dict[str, List[float]]]) -> None:
+    """
+    # Description
+        -> This function aims to plot the evaluation results within violin plots of the used algorithms under the respective settings and environments.
+    ---------------------------------------------------------------------------------------------------------------------------------------------------
+    := param: originalEnvResults - Tuple composed by the algorithm and setting alongside the List with all the evallogs obtained for the trained models for the original Environment.
+    := param: customEnvResults - Tuple composed by the algorithm and setting alongside the List with all the evallogs obtained for the trained models for the custom Environment.
+    := return: None, since we are only plotting results.
+    """
+    
     # Create a Custom Color Map
     customColorMap = ['#29599c', '#f66b6e', '#4cb07a', '#f8946c']
 
@@ -418,77 +432,47 @@ def plotOverallEvaluationResultsViolinplots(originalEnvResults: Tuple[str, str, 
     # Show the plot
     plt.show()
     
-
-import numpy as np
-import matplotlib.pyplot as plt
-import scikit_posthocs as sp
-from scipy import stats
-
 def plotCriticalDifferenceDiagram(originalEnvResults: Tuple[str, str, Dict[str, List[float]]], customEnvResults: Tuple[str, str, Dict[str, List[float]]]) -> None:
-    # Combine results from both environments
-    all_results = originalEnvResults + customEnvResults
-
-    # Extract names and rewards
-    names = [f"original_{model}_{setting}" for model, setting, _ in originalEnvResults]
-    names += [f"custom_{model}_{setting}" for model, setting, _ in customEnvResults]
-    rewards = [data['rewards'] for _, _, data in all_results]
-    print(np.array(rewards).shape)
-
-    rewards2 = (pd.DataFrame(np.array(rewards).T, columns=names))
-    print(rewards2)
-
-    # Perform Friedman test
-    # friedman_statistic, pvalue = stats.friedmanchisquare(*rewards)
-    friedman_statistic, pvalue = stats.friedmanchisquare(*[rewards2[alg] for alg in rewards2.columns])
-
-
-    # Calculate average ranks
-    # all_rewards = np.array(rewards).T  # Transpose to get rewards for each trial across all models
-    # ranks = np.array([stats.rankdata(-r) for r in all_rewards])  # Rank for each trial
-    # avg_ranks = np.mean(ranks, axis=0)  # Average rank for each model
-    # print(avg_ranks, names)
-
-    data = (
-        rewards2.rename_axis('cv_fold')
-          .melt(
-              var_name='estimator',
-              value_name='score',
-              ignore_index=False,
-          )
-          .reset_index()
-    )
-    avg_ranks = data.groupby('cv_fold').score.rank(pct=True).groupby(data.estimator).mean()
-    print(avg_ranks)
-
-    paired_comp = sp.posthoc_nemenyi_friedman(rewards2)
-    print(paired_comp)
-
-    # Create the critical difference diagram
-    fig, ax = plt.subplots(figsize=(10, 6))
-    # sp.critical_difference_diagram(pd.Series(avg_ranks, index=names), paired_comp, ax=ax)
-    sp.critical_difference_diagram(avg_ranks, paired_comp, ax=ax)
-
-    # ranks = rewards2.rank(axis=1, ascending=False).mean()
+    """
+    # Description
+        -> This function aims to plot the critical differences diagram of the used algorithms's performance (based on the rewards) under the respective settings and environments.
+    ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    := param: originalEnvResults - Tuple composed by the algorithm and setting alongside the List with all the evallogs obtained for the trained models for the original Environment.
+    := param: customEnvResults - Tuple composed by the algorithm and setting alongside the List with all the evallogs obtained for the trained models for the custom Environment.
+    := return: None, since we are only plotting results.
+    """
     
-    # # Perform Nemenyi post-hoc test
-    # nemenyi = sp.posthoc_nemenyi_friedman(ranks)
+    # Create a initial dictionary to store the data
+    data = {}
 
-    # # Add Some Styling
-    # marker = {'marker':'o', 'linewidth':1}
-    # label_props = {'backgroundcolor':'#ADD5F7', 'verticalalignment':'top'}
-    
-    # # Plot the Critical Difference Diagram
-    # _ = sp.critical_difference_diagram(ranks, nemenyi, marker_props=marker, label_props=label_props)
+    # Update the data dictionary with the received data
+    for algorithm, settings, envResults in originalEnvResults:
+        data.update({f"[OriginalEnv]-{algorithm}-{settings}":envResults['rewards']})
+    # Update the data dictionary with the received data
+    for algorithm, settings, envResults in customEnvResults:
+        data.update({f"[CustomEnv]-{algorithm}-{settings}":envResults['rewards']})
 
-    # Add Friedman test results to the plot
-    plt.text(0.5, -0.1, f'Friedman test statistic: {friedman_statistic:.4f}\np-value: {pvalue:.4f}', 
-             horizontalalignment='center', verticalalignment='center', 
-             transform=ax.transAxes)
+    # Create a matrix with the collected data
+    matrix = pd.DataFrame(data)
 
-    # Set the title
+    # Calculate ranks
+    ranks = matrix.rank(axis=1, ascending=False).mean()
+
+    # Step 3: Perform the Nemenyi post-hoc test
+    nemenyi = sp.posthoc_nemenyi_friedman(matrix)
+
+    # Adapt all the 0 values into a small value
+    nemenyi = nemenyi.replace(0, 1e-8)
+
+    # Styling parameters
+    marker_props = {'marker': 'o', 'linewidth': 1}  # Markers
+    label_props = {'backgroundcolor': '#ADD5F7', 'verticalalignment': 'top'}
+
+    # Plot Critical Difference Diagram
+    plt.figure(figsize=(10, 6))
+    _ = sp.critical_difference_diagram(ranks=ranks, sig_matrix=nemenyi, marker_props=marker_props, label_props=label_props)
+
+    # Title and layout
     plt.title("Critical Difference Diagram of Rewards")
-
-    # Adjust layout and show the plot
     plt.tight_layout()
     plt.show()
-
