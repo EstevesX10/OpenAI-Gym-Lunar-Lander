@@ -1,15 +1,16 @@
-from typing import Tuple, Union, Dict, List
+from __future__ import (annotations)
+from typing import (Tuple, Union, Dict, List)
 import os
-from pathlib import Path
+from pathlib import (Path)
 import numpy as np
 import matplotlib.pyplot as plt
 import gymnasium as gym
-from gymnasium.wrappers import RecordVideo, RecordEpisodeStatistics
-from collections import defaultdict
+from gymnasium.wrappers import (RecordVideo, RecordEpisodeStatistics)
+from collections import (defaultdict)
 
-from stable_baselines3 import PPO, DQN
-from stable_baselines3.common.env_util import make_vec_env
-from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3 import (PPO, DQN)
+from stable_baselines3.common.env_util import (make_vec_env)
+from stable_baselines3.common.vec_env import (SubprocVecEnv)
 from stable_baselines3.common.callbacks import (
     BaseCallback,
     EveryNTimesteps,
@@ -17,8 +18,9 @@ from stable_baselines3.common.callbacks import (
     EvalCallback,
 )
 
-from Environment import MyLunarLander
-from Configuration import CONFIG, PATHS_CONFIG
+from Environment import (MyLunarLander)
+from Configuration import (CONFIG, PATHS_CONFIG)
+from pickleFileManagement import (saveObject, loadObject)
 
 
 class CustomCheckpointCallback(BaseCallback):
@@ -329,61 +331,64 @@ class LunarLanderManager:
     ) -> None:
         """
         # Description
-            -> This method allows to record a given model upon the selected Environment.
-        ------------------------------------------------------------------------------
+            -> This method allows to record a given model upon the 
+            selected Environment over a selected number of episodes.
+        ------------------------------------------------------------
         := param: model - Trained Model.
         := param: numEpisodes - Number of Episodes to record.
         := return: None, since we are simply testing the model.
         """
 
-        # Define a Environment
-        env = gym.make(self.envName, render_mode="rgb_array")
+        # Check if the video has already been recorded
+        if not os.path.exists(PATHS_CONFIG[self._envVersion][self.algorithm][f"Settings-{self.settingsNumber}"] + 'recordings/rl-video-episode-0.mp4'):
+            # Define a Environment
+            env = gym.make(self.envName, render_mode="rgb_array")
 
-        # Video recorder wrapper
-        trigger = lambda t: t == 0
-        env = RecordVideo(
-            env,
-            video_folder=f"./ExperimentalResults/{self._envVersion}/{self.algorithm}/Settings-{self.settingsNumber}/recordings/",
-            episode_trigger=trigger,
-            video_length=999_999_999,
-            disable_logger=True,
-        )
+            # Video recorder wrapper
+            trigger = lambda t: t == 0
+            env = RecordVideo(
+                env,
+                video_folder=f"./ExperimentalResults/{self._envVersion}/{self.algorithm}/Settings-{self.settingsNumber}/recordings/",
+                episode_trigger=trigger,
+                video_length=999_999_999,
+                disable_logger=True,
+            )
 
-        # Check if a model was given
-        if model is None:
-            # Define Model Path
-            bestModelPath = f"./ExperimentalResults/{self._envVersion}/{self.algorithm}/Settings-{self.settingsNumber}/bestModel/best_model.zip"
+            # Check if a model was given
+            if model is None:
+                # Define Model Path
+                bestModelPath = f"./ExperimentalResults/{self._envVersion}/{self.algorithm}/Settings-{self.settingsNumber}/bestModel/best_model.zip"
 
-            # PPO Algorithm
-            if self.algorithm == "PPO":
-                model = PPO.load(path=bestModelPath, env=env)
-            # DQN Algorithm
-            elif self.algorithm == "DQN":
-                model = DQN.load(path=bestModelPath, env=env)
-            else:
-                # Close the Environment
-                env.close()
-                # Raise Error
-                raise ValueError("Unsupported Algorithm Chosen!")
+                # PPO Algorithm
+                if self.algorithm == "PPO":
+                    model = PPO.load(path=bestModelPath, env=env)
+                # DQN Algorithm
+                elif self.algorithm == "DQN":
+                    model = DQN.load(path=bestModelPath, env=env)
+                else:
+                    # Close the Environment
+                    env.close()
+                    # Raise Error
+                    raise ValueError("Unsupported Algorithm Chosen!")
 
-        # Perform N Episodes
-        for ep in range(numEpisodes):
-            obs, info = env.reset()
-            trunc = False
-            while not trunc:
-                # pass observation to model to get predicted action
-                action, _states = model.predict(obs, deterministic=True)
+            # Perform N Episodes
+            for ep in range(numEpisodes):
+                obs, info = env.reset()
+                trunc = False
+                while not trunc:
+                    # pass observation to model to get predicted action
+                    action, _states = model.predict(obs, deterministic=True)
 
-                # pass action to env and get info back
-                obs, rewards, trunc, done, info = env.step(action)
+                    # pass action to env and get info back
+                    obs, rewards, trunc, done, info = env.step(action)
 
-                # show the environment on the screen
-                env.render()
-                # print(ep, rewards, trunc)
-                # print("---------------")
+                    # show the environment on the screen
+                    env.render()
+                    # print(ep, rewards, trunc)
+                    # print("---------------")
 
-        # Close the Environment
-        env.close()
+            # Close the Environment
+            env.close()
 
     def testRandomAction(self) -> None:
         """
@@ -564,3 +569,37 @@ class LunarLanderManager:
         env.close()
 
         return results
+
+    @staticmethod
+    def computeEvaluationResults(lunarLanderManagers:List[LunarLanderManager]) -> Tuple[defaultdict]:
+        """
+        # Description
+            -> This methos allows to compute, store and load the evaluation results from any given model.
+        -------------------------------------------------------------------------------------------------
+        := param: lunarLanderManagers - List with all the instances of the lunar lander manager which evaluated a specific configuration of the agents on a selected environment.
+        := return: Tuple with the evaluation results of all the models from the given managers.
+        """
+
+        # Define the path for the evaluation results
+        evalutionResultsPath = PATHS_CONFIG["EvaluationResults"]
+
+        if not os.path.exists(evalutionResultsPath):
+            # Define a List for the Final Results
+            finalEvaluationResults = []
+
+            # Iterate through the lunar lander managers and evaluate the model
+            for manager in lunarLanderManagers:
+                # Evaluate the model 
+                managerEvaluationResults = manager.evaluateModel()
+
+                # Append the results to the previous list
+                finalEvaluationResults.append(managerEvaluationResults)
+
+            # Save the results
+            saveObject(objectObtained=finalEvaluationResults, filePath=evalutionResultsPath)
+        else:
+            # Load the previously computed results
+            finalEvaluationResults = loadObject(filePath=evalutionResultsPath)
+
+        # Return the results
+        return finalEvaluationResults

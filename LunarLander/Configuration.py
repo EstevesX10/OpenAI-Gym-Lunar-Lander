@@ -29,6 +29,7 @@ PATHS_CONFIG = {
             "Settings-2": "./ExperimentalResults/CustomEnvironment/DQN/Settings-2/",
         },
     },
+    "EvaluationResults": "./ExperimentalResults/evaluationResults.pkl"
 }
 
 # Define the Settings for the PPO Algorithm
