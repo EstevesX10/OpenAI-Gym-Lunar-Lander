@@ -144,16 +144,13 @@ Adopting a training strategy with **periodic saves and evaluations**, we aimed t
 
 Finally, we proceed to **compare all algorithms and configurations** to identify the **best-performing combination** for each environment.
 
+<!-- Bar Plot -->
+
 <table width="100%">
     <thead>
         <th>
             <div align="center">
                 Bar Plot
-            </div>
-        </th>
-        <th>
-            <div align="center">
-                Violin Plot
             </div>
         </th>
     </thead>
@@ -164,7 +161,23 @@ Finally, we proceed to **compare all algorithms and configurations** to identify
                     <img src="./LunarLander/Assets/FinalBarPlot.png" width="100%" height="100%" />
                 </p>
             </td>
-            <td width="50%">
+        </tr>
+    </tbody>
+</table>
+
+<!-- Violin Plot -->
+
+<table width="100%">
+    <thead>
+        <th>
+            <div align="center">
+                Violin Plot
+            </div>
+        </th>
+    </thead>
+    <tbody>
+        <tr>
+            <td width="100%">
                 <p align="center" width="100%">
                     <img src="./LunarLander/Assets/FinalViolinPlot.png" width="100%" height="100%" />
                 </p>
@@ -173,11 +186,26 @@ Finally, we proceed to **compare all algorithms and configurations** to identify
     </tbody>
 </table>
 
-<br/>
+<!-- Critical Differences Diagram Plot -->
 
-<p align="center" width="100%">
-    <img src="./LunarLander/Assets/CriticalDifferencesDiagram.png" width="70%" height="70%" />
-</p>
+<table width="100%">
+    <thead>
+        <th>
+            <div align="center">
+                Critical Differences Diagram
+            </div>
+        </th>
+    </thead>
+    <tbody>
+        <tr>
+            <td width="100%">
+                <p align="center" width="100%">
+                    <img src="./LunarLander/Assets/CriticalDifferencesDiagram.png" width="100%" height="100%" />
+                </p>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 The **PPO algorithm consistently outperforms the DQN algorithm** in both the **Original and Custom Environments**. It's performance remains relatively **stable across different settings**, showing **minimal differences** between the Original Environment and the Custom Environment.
 
