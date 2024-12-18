@@ -48,7 +48,7 @@ This project aims to analyse **how does the environment design influence the out
 
 ## Project Results
 
-> ADD PROJECT RESULTS
+Adopting a training strategy with **periodic saves and evaluations**, we aimed to identify the **best performing model** for each configuration of the **environment**, **algorithm** and respective **hyperparameters** over 10-30 million time steps, resulting in the **following outcomes**:
 
 <table width="100%">
     <thead>
@@ -90,8 +90,9 @@ This project aims to analyse **how does the environment design influence the out
             </td>
             <td width="45%">
                 <p align="center" width="100%">
-                    [NOT DONE]
-                    <!-- <img src="./LunarLander/ExperimentalResults/OriginalEnvironment/PPO/Settings-2/recordings/rl-video-episode-0.gif" width="100%" height="100%" /> -->
+                    <img src="./LunarLander/Assets/Warning.png" width="30%" height="30%" />
+                    <br/>
+                    [ NOT DONE ]
                 </p>
             </td>
             <td width="45%">
@@ -125,8 +126,9 @@ This project aims to analyse **how does the environment design influence the out
             </td>
             <td width="45%">
                 <p align="center" width="100%">
-                    [NOT DONE]
-                    <!-- <img src="./LunarLander/ExperimentalResults/OriginalEnvironment/DQN/Settings-2/recordings/rl-video-episode-0.gif" width="100%" height="100%" /> -->
+                    <img src="./LunarLander/Assets/Warning.png" width="30%" height="30%" />
+                    <br/>
+                    [ NOT DONE ]
                 </p>
             </td>
             <td width="45%">
@@ -137,6 +139,53 @@ This project aims to analyse **how does the environment design influence the out
         </tr>
     </tbody>
 </table>
+
+## Results Evaluation
+
+Finally, we proceed to **compare all algorithms and configurations** to identify the **best-performing combination** for each environment.
+
+<table width="100%">
+    <thead>
+        <th>
+            <div align="center">
+                Bar Plot
+            </div>
+        </th>
+        <th>
+            <div align="center">
+                Violin Plot
+            </div>
+        </th>
+    </thead>
+    <tbody>
+        <tr>
+            <td width="50%">
+                <p align="center" width="100%">
+                    <img src="./LunarLander/Assets/FinalBarPlot.png" width="100%" height="100%" />
+                </p>
+            </td>
+            <td width="50%">
+                <p align="center" width="100%">
+                    <img src="./LunarLander/Assets/FinalViolinPlot.png" width="100%" height="100%" />
+                </p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<br/>
+
+<p align="center" width="100%">
+    <img src="./LunarLander/Assets/CriticalDifferencesDiagram.png" width="70%" height="70%" />
+</p>
+
+The **PPO algorithm consistently outperforms the DQN algorithm** in both the **Original and Custom Environments**. It's performance remains relatively **stable across different settings**, showing **minimal differences** between the Original Environment and the Custom Environment.
+
+Regardless of the **applied configuration**, PPO demonstrates **consistent success** in **achieving high rewards**, **shorter episode lengths**, and **higher success rates**.
+
+In contrast, the **DQN algorithm's performance** **deteriorates** significantly in the **Custom Environment**. While the Custom Environment does **lead to shorter episode lengths for DQN**, the results are **considerably worse** compared to the Original Environment.
+
+This decline is primarily because, in most episodes, the **DQN agent struggles to manage its fuel efficiently**. Instead of progressing toward the goal, the agent often **expends excessive fuel** attempting to **stabilize its position**. Consequently, this behavior results in **frequent failure to reach the goal** and **negative rewards**.
 
 ## Authorship
 
