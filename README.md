@@ -224,7 +224,7 @@ This decline is primarily because, in most episodes, the **DQN agent struggles t
 <div align="right">
 <sub>
 
-<sup></sup>
+<!-- <sup></sup> -->
 
 `README.md by Gonçalo Esteves`
 </sub>
