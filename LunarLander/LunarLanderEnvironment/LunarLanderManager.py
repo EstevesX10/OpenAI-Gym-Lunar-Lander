@@ -18,10 +18,9 @@ from stable_baselines3.common.callbacks import (
     EvalCallback,
 )
 
-from Environment import (MyLunarLander)
-from Configuration import (CONFIG, PATHS_CONFIG)
-from pickleFileManagement import (saveObject, loadObject)
-
+from .Environment import (MyLunarLander)
+from Utils.Configuration import (CONFIG, PATHS_CONFIG)
+from Utils.pickleFileManagement import (saveObject, loadObject)
 
 class CustomCheckpointCallback(BaseCallback):
     def __init__(self, check_freq, save_path, verbose=0):

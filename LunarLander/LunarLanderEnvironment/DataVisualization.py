@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-from Configuration import CONFIG
+from Utils.Configuration import CONFIG
 
 import scikit_posthocs as sp
 from scipy import stats

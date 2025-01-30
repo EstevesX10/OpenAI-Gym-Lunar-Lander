@@ -40,7 +40,7 @@ from Box2D.b2 import (
     revoluteJointDef,
 )
 
-from Configuration import CONFIG
+from Utils.Configuration import CONFIG
 
 
 class Action:
