@@ -90,9 +90,7 @@ Adopting a training strategy with **periodic saves and evaluations**, we aimed t
             </td>
             <td width="45%">
                 <p align="center" width="100%">
-                    <img src="./LunarLander/Assets/Warning.png" width="30%" height="30%" />
-                    <br/>
-                    [ NOT DONE ]
+                    <img src="./LunarLander/Assets/Dash.png" width="30%" height="30%" />
                 </p>
             </td>
             <td width="45%">
@@ -126,9 +124,7 @@ Adopting a training strategy with **periodic saves and evaluations**, we aimed t
             </td>
             <td width="45%">
                 <p align="center" width="100%">
-                    <img src="./LunarLander/Assets/Warning.png" width="30%" height="30%" />
-                    <br/>
-                    [ NOT DONE ]
+                    <img src="./LunarLander/Assets/Dash.png" width="30%" height="30%" />
                 </p>
             </td>
             <td width="45%">
