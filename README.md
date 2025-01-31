@@ -5,7 +5,7 @@
 </div>
 
 <p align="center" width="100%">
-    <img src="./LunarLander/Assets/Spacecraft.jpg" width="55%" height="55%" alt="Multi-Agent Autonomous Waste Collection System"/>
+    <img src="./LunarLander/Assets/Spacecraft.jpg" width="55%" height="55%"/>
 </p>
 
 <div align="center">
@@ -20,7 +20,7 @@
 <br/>
 
 <div align="center">
-    <a href="https://github.com/EstevesX10/OpenAI-Gym-Lunar-Lander/blob/main/LICENSE">
+    <a href="">
         <img src="https://img.shields.io/github/license/EstevesX10/OpenAI-Gym-Lunar-Lander?style=flat&logo=gitbook&logoColor=bedcf5&label=License&color=bedcf5">
     </a>
     <a href="#">
