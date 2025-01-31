@@ -29,8 +29,8 @@
     <a href="#">
         <img src="https://img.shields.io/github/stars/EstevesX10/OpenAI-Gym-Lunar-Lander?style=flat&logo=adafruit&logoColor=bedcf5&logoSize=auto&label=Stars&color=bedcf5">
     </a>
-    <a href="https://github.com/EstevesX10/OpenAI-Gym-Lunar-Lander/blob/main/SETUP.md">
-        <img src="https://img.shields.io/badge/Setup-SETUP.md-white?style=flat&logo=springboot&logoColor=bedcf5&logoSize=auto&color=bedcf5"> 
+    <a href="https://github.com/EstevesX10/OpenAI-Gym-Lunar-Lander/blob/main/DEPENDENCIES.md">
+        <img src="https://img.shields.io/badge/Dependencies-DEPENDENCIES.md-white?style=flat&logo=anaconda&logoColor=bedcf5&logoSize=auto&color=bedcf5"> 
     </a>
 </div>
 

@@ -18,7 +18,7 @@ Or use it inside a `jupyter notebook's code cell`:
 
 Another approach would be to `Create a New Anaconda Environment` with all the dependencies already installed. To do so, type:
 
-    conda env create -f LunarLander.yml
+    conda env create -f gym.yml
 
 ## Execution
 
