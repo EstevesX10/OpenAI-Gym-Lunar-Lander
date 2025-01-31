@@ -21,7 +21,7 @@
 
 <div align="center">
     <a href="">
-        <img src="https://img.shields.io/github/license/EstevesX10/OpenAI-Gym-Lunar-Lander?style=flat&logo=gitbook&logoColor=bedcf5&label=License&color=bedcf5">
+        <img src="https://img.shields.io/github/license/EstevesX10/OpenAI-Gym-Lunar-Lander?style=flat&logo=gitbook&logoColor=bedcf5&label=License&color=bedcf5&">
     </a>
     <a href="#">
         <img src="https://img.shields.io/github/repo-size/EstevesX10/OpenAI-Gym-Lunar-Lander?style=flat&logo=googlecloudstorage&logoColor=bedcf5&logoSize=auto&label=Repository%20Size&color=bedcf5">
