@@ -5,7 +5,7 @@
 </div>
 
 <p align="center" width="100%">
-    <img src="./LunarLander/Assets/Spacecraft.jpg" width="55%" height="55%"/>
+    <img src="./LunarLander/Assets/Spacecraft.jpg" width="55%" />
 </p>
 
 <div align="center">
@@ -73,12 +73,12 @@ Adopting a training strategy with **periodic saves and evaluations**, we aimed t
             </td>
             <td width="45%">
                 <p align="center" width="100%">
-                    <img src="./LunarLander/ExperimentalResults/OriginalEnvironment/PPO/Settings-1/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
+                    <img src="./LunarLander/ExperimentalResults/OriginalEnvironment/PPO/Settings-1/recordings/rl-video-episode-0.gif" width="100%" />
                 </p>
             </td>
             <td width="45%">
                 <p align="center" width="100%">
-                    <img src="./LunarLander/ExperimentalResults/CustomEnvironment/PPO/Settings-1/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
+                    <img src="./LunarLander/ExperimentalResults/CustomEnvironment/PPO/Settings-1/recordings/rl-video-episode-0.gif" width="100%" />
                 </p>
             </td>
         </tr>
@@ -95,7 +95,7 @@ Adopting a training strategy with **periodic saves and evaluations**, we aimed t
             </td>
             <td width="45%">
                 <p align="center" width="100%">
-                    <img src="./LunarLander/ExperimentalResults/CustomEnvironment/PPO/Settings-2/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
+                    <img src="./LunarLander/ExperimentalResults/CustomEnvironment/PPO/Settings-2/recordings/rl-video-episode-0.gif" width="100%" />
                 </p>
             </td>
         </tr>
@@ -107,12 +107,12 @@ Adopting a training strategy with **periodic saves and evaluations**, we aimed t
             </td>
             <td width="45%">
                 <p align="center" width="100%">
-                    <img src="./LunarLander/ExperimentalResults/OriginalEnvironment/DQN/Settings-1/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
+                    <img src="./LunarLander/ExperimentalResults/OriginalEnvironment/DQN/Settings-1/recordings/rl-video-episode-0.gif" width="100%" />
                 </p>
             </td>
             <td width="45%">
                 <p align="center" width="100%">
-                    <img src="./LunarLander/ExperimentalResults/CustomEnvironment/DQN/Settings-1/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
+                    <img src="./LunarLander/ExperimentalResults/CustomEnvironment/DQN/Settings-1/recordings/rl-video-episode-0.gif" width="100%" />
                 </p>
             </td>
         </tr>
@@ -124,12 +124,12 @@ Adopting a training strategy with **periodic saves and evaluations**, we aimed t
             </td>
             <td width="45%">
                 <p align="center" width="100%">
-                    <img src="./LunarLander/Assets/Dash.png" width="30%" height="30%" />
+                    <img src="./LunarLander/Assets/Dash.png" width="30%" />
                 </p>
             </td>
             <td width="45%">
                 <p align="center" width="100%">
-                    <img src="./LunarLander/ExperimentalResults/CustomEnvironment/DQN/Settings-2/recordings/rl-video-episode-0.gif" width="100%" height="100%" />
+                    <img src="./LunarLander/ExperimentalResults/CustomEnvironment/DQN/Settings-2/recordings/rl-video-episode-0.gif" width="100%" />
                 </p>
             </td>
         </tr>
@@ -154,7 +154,7 @@ Finally, we proceed to **compare all algorithms and configurations** to identify
         <tr>
             <td width="50%">
                 <p align="center" width="100%">
-                    <img src="./LunarLander/Assets/FinalBarPlot.png" width="100%" height="100%" />
+                    <img src="./LunarLander/Assets/FinalBarPlot.png" width="100%" />
                 </p>
             </td>
         </tr>
@@ -175,7 +175,7 @@ Finally, we proceed to **compare all algorithms and configurations** to identify
         <tr>
             <td width="100%">
                 <p align="center" width="100%">
-                    <img src="./LunarLander/Assets/FinalViolinPlot.png" width="100%" height="100%" />
+                    <img src="./LunarLander/Assets/FinalViolinPlot.png" width="100%" />
                 </p>
             </td>
         </tr>
@@ -196,7 +196,7 @@ Finally, we proceed to **compare all algorithms and configurations** to identify
         <tr>
             <td width="100%">
                 <p align="center" width="100%">
-                    <img src="./LunarLander/Assets/CriticalDifferencesDiagram.png" width="100%" height="100%" />
+                    <img src="./LunarLander/Assets/CriticalDifferencesDiagram.png" width="100%" />
                 </p>
             </td>
         </tr>
